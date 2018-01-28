@@ -9,9 +9,9 @@
         "psr-4": {
             "Slimvc\\": "lib/Slimvc",
 
-            "Sample\\Controller\\": "apps/sample/controllers",
-            "Sample\\Model\\": "apps/sample/models",
-            "Sample\\Middlewares\\": "apps/sample/middlewares"
+            "Sample\\Controller\\": "apps/iot/controllers",
+            "Sample\\Model\\": "apps/iot/models",
+            "Sample\\Middlewares\\": "apps/iot/middlewares"
         }
     },
     "require": {

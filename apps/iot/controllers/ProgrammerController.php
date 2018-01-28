@@ -1,9 +1,9 @@
 <?php
-namespace Sample\Controller;
+namespace Iot\Controller;
 
 
 use Slimvc\Core\Controller;
-use Sample\Model\ProgrammerModel;
+use Iot\Model\ProgrammerModel;
 
 class ProgrammerController extends Controller
 {
