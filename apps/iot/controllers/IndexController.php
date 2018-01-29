@@ -1,5 +1,5 @@
 <?php
-namespace Sample\Controller;
+namespace Iot\Controller;
 
 
 use Slimvc\Core\Controller;

@@ -1,5 +1,5 @@
 <?php
-namespace Sample\Model;
+namespace Iot\Model;
 
 
 use Slimvc\Core\Model;
