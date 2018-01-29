@@ -10,7 +10,9 @@ $app = new Slim\Slim(array('mode' => APP_ENV));
 // load configuration files
 $app->configureMode(APP_ENV, function () use ($app) {
         $config = include APP_DIR . '/etc/' . APP_ENV . '.php';
+        $password = include APP_DIR . '/etc/' .'password.php';
         $app->config($config);
+        $app->config($password);
 });
 
 // initialize the routers
