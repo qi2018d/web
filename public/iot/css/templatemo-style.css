@@ -219,11 +219,17 @@ h1, h2, h3, h4, h5 {
   color: #999999;
 }
 
-.main-content,
 .banner-bg {
   float: right;
   width: 77%;
 }
+.main-content{
+    float: right;
+    width: 77%;
+    height: 100%;
+    margin: 0 auto;
+}
+
 @media screen and (max-width: 1290px) {
   .main-content,
   .banner-bg {
@@ -564,4 +570,14 @@ h3.profile-title {
 }
 #footer p.copyright-text a:hover {
   color: #6cc0f7;
+}
+
+
+
+/* user form */
+.user-form-wrapper{
+    float: right;
+    width: 77%;
+    height: 100%;
+    margin: 0 auto;
 }
