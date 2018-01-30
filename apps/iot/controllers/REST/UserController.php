@@ -11,6 +11,7 @@ use Slimvc\Core\Controller;
 
 class UserController extends Controller
 {
+
     public function actionPostUserSignup(){
         //
         $this->getApp()->contentType('application/json');

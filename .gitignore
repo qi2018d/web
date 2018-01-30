@@ -1,0 +1,17 @@
+# Mac OS X
+.DS_Store
+
+# Vagrant files
+Vagrantfile
+bootstrap.sh
+.vagrant/
+
+# phpStorm
+.idea/
+
+
+# password file
+apps/iot/etc/password.php
+
+# php vendor
+vendor/
