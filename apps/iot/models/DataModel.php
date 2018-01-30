@@ -13,10 +13,5 @@ use Slimvc\Core\Model;
 
 class DataModel extends Model
 {
-    public function getUser($id){
-        $sql = "SELECT user_id, username, status_public
-                FROM user
-                WHERE user_id = ?";
 
-    }
 }
