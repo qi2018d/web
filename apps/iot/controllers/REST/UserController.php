@@ -115,6 +115,7 @@ class UserController extends Controller
         echo json_encode($data);
     }
     public function actionGetUserSensor($user_id){
+        // show all sensors of users.
         $this->getApp()->contentType('application/json');
 
         $reg = new RegistrationModel();
