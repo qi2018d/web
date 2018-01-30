@@ -14,7 +14,6 @@ use Slimvc\Core\Controller;
 
 class UserController extends Controller
 {
-
     public function actionPostUserSignup(){
         // insert user data with status_auth 0
         $this->getApp()->contentType('application/json');
@@ -26,15 +25,16 @@ class UserController extends Controller
         }
         catch (\Exception $e){
             $data = array(
-                'status' => 'fail',
-                'content' => $e->getMessage()
+                'status' => 0,
+                'message' => $e->getMessage()
             );
             echo json_encode($data);
             exit;
         }
 
         $data = array(
-            'status' => 'success'
+            'status' => 1,
+            'message' => 'Success'
         );
         echo json_encode($data);
     }
@@ -166,14 +166,34 @@ class UserController extends Controller
         }
         echo json_encode($data);
     }
-
-    public function actionPostUserDeregisterSensor(){
-        //
+    public function actionPostUserDeregisterSensor($user_id){
+        // deregister the sensor with user_id, json_data
         $this->getApp()->contentType('application/json');
-        $data = array(
-            'title' => 'It works!',
-            'content' => 'Have fun with Slim framework in MVC way!'
-        );
+        $req = json_decode($this->getApp()->request->getBody());
+
+        if(isset($req->{'bd_addr'})){
+            $reg = new RegistrationModel();
+            try{
+                $reg->deleteRegistration($user_id, $req);
+                $data = array(
+                    'status' => 1,
+                    'message' => 'Success'
+                );
+            }
+            catch(\Exception $e){
+                $data = array(
+                    'status' => 0,
+                    'message' => $e->getMessage()
+                );
+            }
+        }
+        else {
+            $data = array(
+                'status' => 0,
+                'message' => 'Submitted form is invalid. '
+            );
+        }
+
         echo json_encode($data);
     }
 }
