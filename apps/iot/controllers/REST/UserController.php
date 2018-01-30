@@ -6,10 +6,9 @@
  * Time: 오후 4:14
  */
 
-namespace Iot\Controller;
+namespace Iot\Controller\REST;
 use Iot\Model\RegistrationModel;
 use Iot\Model\UserModel;
-use PHPMailer\PHPMailer\Exception;
 use Slimvc\Core\Controller;
 
 class UserController extends Controller
@@ -135,7 +134,6 @@ class UserController extends Controller
                 'message' => 'Request form is invalid. ',
             );
         }
-
         echo json_encode($data);
     }
     public function actionPostUserRegisterSensor($user_id){

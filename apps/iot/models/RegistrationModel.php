@@ -22,13 +22,16 @@ class RegistrationModel extends Model
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
         $stmt->execute(array($user_id));
         if($stmt->rowCount() >= 0){
-            $result = $stmt->fetchAll();
-            foreach($result as $r){
+            $reg_records = $stmt->fetchAll();
+            $result = [];
+            foreach($reg_records as $r){
                 if(strlen($r['bd_addr']) == 12){
-                    $r['bd_addr'] = chunk_split($r['bd_addr'], 2, ":");
+                    $r['bd_addr'] = substr(chunk_split($r['bd_addr'], 2, ":"),0,17);
+                    array_push($result, $r);
                 }
                 else {
-                    $r['bd_addr'] =  chunk_split("0" . $r['bd_addr'], 2, ":");
+                    $r['bd_addr'] =  substr(chunk_split($r['bd_addr'], 2, ":"),0,17);
+                    array_push($result, $r);
                 }
             }
             return $result;
