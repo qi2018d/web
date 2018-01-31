@@ -31,6 +31,35 @@ class PageController extends Controller
         $this->render("signin.phtml", $data);
 
     }
+    public function actionSignupValidation()
+    {
+        $this->getApp()->contentType('text/html');
+        /*
+        if(isset($_SESSION["ver_id"])){
+            $data = array(
+                "title" => $this->title,
+                "team_name" => $this->team_name);
+            $this->render("validation.phtml", $data);
+        }
+        else
+        {
+            $this->getApp()->status(404);
+        }
+        */
+        $data = array(
+            "title" => $this->title,
+            "team_name" => $this->team_name);
+        $this->render("validation.phtml", $data);
+    }
+    public function actionSignup()
+    {
+        $this->getApp()->contentType('text/html');
+        $data = array(
+            "title" => $this->title,
+            "team_name" => $this->team_name);
+        $this->render("signup.phtml", $data);
+    }
+
     public function actionMap()
     {
         $this->getApp()->contentType('text/html');

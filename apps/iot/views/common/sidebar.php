@@ -39,7 +39,13 @@
         <ul class="navigation">
             <li><a href="/"><i class="fa fa-smile-o"></i>Welcome</a></li>
             <li><a href="/map"><i class="fa fa-globe"></i>Air Map</a></li>
-            <li><a href="/signin"><i class="fa fa-pencil"></i>Sign in</a></li>
+
+            <?php if(isset($_SESSION["user_id"])) :?>
+                <li><a href="/sensor"><i class="fa fa-bluetooth"></i>Sensor</a></li>
+                <li><a href="/signin"><i class="fa fa-pencil"></i>Sign out</a></li>
+            <?php else: ?>
+                <li><a href="/signin"><i class="fa fa-pencil"></i>Sign in</a></li>
+            <?php endif; ?>
             <li><a href="/developers"><i class="fa fa-link"></i>Contact us</a></li>
         </ul>
     </div> <!-- .main-navigation -->
@@ -56,5 +62,5 @@
     </div> <!-- .social-icons -->
 
 </div> <!-- .sidebar-menu -->
-<script src="js/sidebar.js"></script>
+<script src="/js/sidebar.js"></script>
 

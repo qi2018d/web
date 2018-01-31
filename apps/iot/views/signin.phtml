@@ -3,30 +3,28 @@
 <!-- MAIN CONTENT -->
 <div class="main-content">
     <div class="content-wrapper">
-
-        <div class="user-form-wrapper">
-            asdfwae
-        </div>
-
-    <!--div class="content-wrapper">
-
-            <div class="page-section" id="about">
-                <div class="row">
-                    <div class="col-md-12">
-                        <h4 class="widget-title">About This Project</h4>
-                        <div class="about-image">
-                            <img src="img/8.jpg" alt="about project">
-                        </div>
-                        <p>This health related monitoring system project shows you the real-time and historical air quality data from various area in the world. Also, you can check your heart rate  </p>
-                        <hr>
-                    </div>
+        <div class="page-section" id="about">
+            <div class="row">
+                <div class="user-form">
+                    <img id="profile-img" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" />
+                    <p id="profile-name"></p>
+                    <form id="signin-form" class="user-auth-form" novalidate="novalidate">
+                        <input type="email" id="inputEmail" class="form-control" placeholder="Email or User name" required autofocus>
+                        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+                        <!--div id="remember" class="checkbox">
+                            <label>
+                                <input type="checkbox" value="remember-me"> Remember me
+                            </label>
+                        </div-->
+                        <button class="btn btn-lg btn-primary btn-block btn-signin" type="submit">Sign in</button>
+                    </form><!-- /form -->
+                    <br/>
+                    <a href="/signup">Sign up</a><br/>
+                    <a href="/forgotpw">Forgot the password?</a>
                 </div>
             </div>
-
             <?php require 'common/footer.php' ?>
-
-        </div-->
-
+        </div>
     </div>
 </div>
 <?php require 'common/end.php' ?>

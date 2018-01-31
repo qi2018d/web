@@ -22,4 +22,6 @@ foreach ($routers as $route) {
 }
 unset($route, $routers);
 
+session_start();
+
 $app->run();

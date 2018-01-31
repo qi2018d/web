@@ -574,10 +574,28 @@ h3.profile-title {
 
 
 
-/* user form */
-.user-form-wrapper{
-    float: right;
-    width: 77%;
-    height: 100%;
+.user-form{
     margin: 0 auto;
+    max-width: 350px;
+    padding: 40px 40px;
+    border: 2px solid;
+    border-radius: 10px;
 }
+
+
+.map-container{
+    padding-top: 50px;
+}
+
+#air-map{
+    height: 550px;
+    width: 100%;
+}
+
+.user-auth-form input{
+    margin-top: 10px;
+}
+.user-auth-form button{
+    margin-top: 30px;
+}
+
