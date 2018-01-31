@@ -1,0 +1,36 @@
+<?php require 'common/begin.php' ?>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+    <div class="content-wrapper">
+        <div class="page-section" id="about">
+            <div class="row">
+                <!--div class="user-form-wrapper"-->
+                    <div class="user-form">
+                        <form id="signup-form" class="user-auth-form" novalidate="novalidate">
+                            <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+                            <input type="name" id="inputName" class="form-control" placeholder="User Name" required autofocus>
+                            <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+                            <input type="password" id="inputPasswordConfirm" class="form-control" placeholder="Confirm Password" required>
+
+                            <!--div id="remember" class="checkbox">
+                                <label>
+                                    <input type="checkbox" value="remember-me"> Remember me
+                                </label>
+                            </div-->
+                            <button class="btn btn-lg btn-primary btn-block btn-signin" type="submit">Sign up</button>
+                        </form><!-- /form -->
+                    <br/>
+                        <a href="/signin">Sign in</a><br/>
+                    </div>
+
+                <!--/div-->
+            </div>
+            <?php require 'common/footer.php' ?>
+        </div>
+    </div>
+</div>
+<?php require 'common/end.php' ?>
+
+
+

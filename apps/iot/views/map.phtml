@@ -5,9 +5,25 @@
         <div class="fluid-container">
             <div class="content-wrapper">
 
+                <div class="map-container">
+
+                    <div id="air-map"></div>
+                    <script>
+                        var map;
+                        function initMap() {
+                            map = new google.maps.Map(document.getElementById('air-map'), {
+                                center: {lat: -34.397, lng: 150.644},
+                                zoom: 8
+                            });
+                        }
+                    </script>
+                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC94R7siOtY7X9L0P-9pTzQiCn7V2hbCaI&callback=initMap" async defer></script>
+
+                </div>
                 <?php require 'common/footer.php' ?>
 
             </div>
         </div>
     </div>
 <?php require 'common/end.php' ?>
+

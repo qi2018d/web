@@ -1,15 +1,27 @@
 <?php
-// default index action, GET /
-$app->get('/', 'Iot\Controller\IndexController:actionIndex')
-    ->name('get-homepage');
 
-$app->group('/v1', function () use ($app) {
-    // get programmers list, GET /v1/programmers
-    $app->get('/programmers', 'Iot\Controller\ProgrammerController:actionGetProgrammers')
-        ->name('get-programmers-list');
+/* routes for pages */
 
-    // get programmer detail, GET /v1/programmers/:id
-    $app->get('/programmers/:id', 'Iot\Controller\ProgrammerController:actionGetProgrammer')
-        ->conditions(array('id' => '\d+'))
-        ->name('get-programmer-detail');
+$app->get('/', 'Iot\Controller\PageController:actionHome')
+    ->name('get-home-page');
+
+$app->get('/map', 'Iot\Controller\PageController:actionMap')
+    ->name('get-map-page');
+
+$app->get('/signin', 'Iot\Controller\PageController:actionSignin')
+    ->name('get-signin-page');
+
+$app->group('/signup', function() use ($app){
+
+    $app->get('/', 'Iot\Controller\PageController:actionSignup')
+        ->name('get-signup-page');
+
+    $app->get('/validation', 'Iot\Controller\PageController:actionSignupValidation')
+        ->name('get-signup-validation-page');
+
+});
+
+
+$app->get('/developers', 'Iot\Controller\PageController:actionDevelopers')
+    ->name('get-developers-page');
 });
