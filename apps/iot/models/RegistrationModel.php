@@ -10,18 +10,25 @@ namespace Iot\Model;
 
 
 use Slimvc\Core\Model;
+include '../../public/iot/functions.php';
 
 class RegistrationModel extends Model
 {
     public function getRegistration($user_id){
-        $sql = 'SELECT name, hex(mac_addr) AS mac_addr
+        // need mac address formatting
+        $sql = 'SELECT name, HEX(mac_addr) AS bd_addr
                 FROM registration
                 WHERE user_id = ?';
         $stmt = $this->getReadConnection()->prepare($sql);
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
         $stmt->execute(array($user_id));
         if($stmt->rowCount() >= 0){
-            return $stmt->fetchAll();
+            $reg_records = $stmt->fetchAll();
+            $result = [];
+            foreach($reg_records as $r){
+                $r['bd_addr'] = mac_address_formatter($r['bd_addr']);
+            }
+            return $result;
         }
         else {
             return false;
@@ -29,9 +36,9 @@ class RegistrationModel extends Model
     }
 
     public function saveRegistration($user_id, $req){
-        $mac_addr = str_replace(':', '', $req->{'bd_addr'});
+        $mac_addr = mac_address_str2hex($req->{'bd_addr'});
         if(strlen($mac_addr) != 12){
-            throw new \Exception('mac_addr is invalid. ');
+            throw new \Exception('mac_addr is invalid. ', 201);
         }
 
         $name = $req->{'name'};
@@ -43,7 +50,7 @@ class RegistrationModel extends Model
         $stmt->execute(array($user_id, $mac_addr));
         if($stmt->rowCount() > 0){
             // already exist
-            throw new \Exception('mac_addr is already exist. ');
+            throw new \Exception('mac_addr is already exist. ', 202);
         }
         else {
             $sql = 'INSERT INTO registration (user_id, mac_addr, name)
@@ -57,7 +64,40 @@ class RegistrationModel extends Model
                 return true;
             }
             else {
-                throw new \Exception('submit form is invalid. ');
+                throw new \Exception('submit form is invalid. ', 203);
+            }
+        }
+    }
+
+    public function deleteRegistration($user_id, $req){
+        $mac_addr = str_replace(':', '', $req->{'bd_addr'});
+        if(strlen($mac_addr) != 12){
+            throw new \Exception('mac_addr is invalid. ', 201);
+        }
+
+        $sql = 'SELECT reg_id
+                FROM registration
+                WHERE user_id = ? AND CONV(mac_addr, 10, 16) = ?';
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        $stmt->execute(array($user_id, $mac_addr));
+
+        if($stmt->rowCount() == 0){
+            // already exist
+            throw new \Exception('The sensor is not exist. ', 204);
+        }
+        else {
+            $reg_id = $stmt->fetch()['reg_id'];
+            $sql = 'DELETE FROM registration
+                    WHERE reg_id = :reg_id';
+            $stmt = $this->getReadConnection()->prepare($sql);
+            $stmt->bindParam('reg_id', $reg_id, FILTER_SANITIZE_NUMBER_INT);
+            $stmt->execute();
+            if ($stmt->rowCount() > 0){
+                return true;
+            }
+            else {
+                throw new \Exception('Cannot find valid reg_id ' . strval($reg_id), 205);
             }
         }
     }
