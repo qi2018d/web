@@ -44,15 +44,15 @@ $app->group('/api', function () use ($app) {
     // DATA API
     $app->group('/data', function () use ($app){
         //  Send a new air quality sensor data.
-        $app->post('/send/air', 'Iot\Controller\DataController:actionPostDataSendAir')
+        $app->post('/send/air', 'Iot\Controller\REST\DataController:actionPostDataSendAir')
             ->name('post-send-sensor-data');
 
         //  Send a new heart sensor data.
-        $app->post('/send/heart', 'Iot\Controller\Data\Controller:actionPostDataSendHeart')
+        $app->post('/send/heart', 'Iot\Controller\REST\DataController:actionPostDataSendHeart')
             ->name('post-delete-heart-data');
 
         //  Show air quality data for google maps.
-        $app->post('/read/maps', 'Iot\Controller\DataController:actionPostReadMaps')
+        $app->post('/read/maps', 'Iot\Controller\REST\DataController:actionPostReadMaps')
             ->name('post-read-data-maps');
     });
 });

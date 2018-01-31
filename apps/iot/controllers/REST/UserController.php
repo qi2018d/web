@@ -9,7 +9,7 @@
 namespace Iot\Controller\REST;
 use Iot\Model\RegistrationModel;
 use Iot\Model\UserModel;
-use PHPMailer\PHPMailer\Exception;
+
 use PHPMailer\PHPMailer\PHPMailer;
 use Slimvc\Core\Controller;
 
@@ -19,7 +19,7 @@ class UserController extends Controller
         // insert user data with status_auth 0
         // verification code submit to actionPostUserVerifyCode
 
-        $this->getApp()->contentType('text/html');
+        $this->getApp()->contentType('application/json');
         $req = json_decode($this->getApp()->request->getBody());
         $user = new UserModel();
         //

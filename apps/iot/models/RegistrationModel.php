@@ -10,6 +10,7 @@ namespace Iot\Model;
 
 
 use Slimvc\Core\Model;
+include '../../public/iot/functions.php';
 
 class RegistrationModel extends Model
 {
@@ -25,14 +26,7 @@ class RegistrationModel extends Model
             $reg_records = $stmt->fetchAll();
             $result = [];
             foreach($reg_records as $r){
-                if(strlen($r['bd_addr']) == 12){
-                    $r['bd_addr'] = substr(chunk_split($r['bd_addr'], 2, ":"),0,17);
-                    array_push($result, $r);
-                }
-                else {
-                    $r['bd_addr'] =  substr(chunk_split($r['bd_addr'], 2, ":"),0,17);
-                    array_push($result, $r);
-                }
+                $r['bd_addr'] = mac_address_formatter($r['bd_addr']);
             }
             return $result;
         }
@@ -42,7 +36,7 @@ class RegistrationModel extends Model
     }
 
     public function saveRegistration($user_id, $req){
-        $mac_addr = str_replace(':', '', $req->{'bd_addr'});
+        $mac_addr = mac_address_str2hex($req->{'bd_addr'});
         if(strlen($mac_addr) != 12){
             throw new \Exception('mac_addr is invalid. ', 201);
         }
