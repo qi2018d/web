@@ -44,7 +44,7 @@ class RegistrationModel extends Model
     public function saveRegistration($user_id, $req){
         $mac_addr = str_replace(':', '', $req->{'bd_addr'});
         if(strlen($mac_addr) != 12){
-            throw new \Exception('mac_addr is invalid. ');
+            throw new \Exception('mac_addr is invalid. ', 201);
         }
 
         $name = $req->{'name'};
@@ -56,7 +56,7 @@ class RegistrationModel extends Model
         $stmt->execute(array($user_id, $mac_addr));
         if($stmt->rowCount() > 0){
             // already exist
-            throw new \Exception('mac_addr is already exist. ');
+            throw new \Exception('mac_addr is already exist. ', 202);
         }
         else {
             $sql = 'INSERT INTO registration (user_id, mac_addr, name)
@@ -70,7 +70,7 @@ class RegistrationModel extends Model
                 return true;
             }
             else {
-                throw new \Exception('submit form is invalid. ');
+                throw new \Exception('submit form is invalid. ', 203);
             }
         }
     }
@@ -78,7 +78,7 @@ class RegistrationModel extends Model
     public function deleteRegistration($user_id, $req){
         $mac_addr = str_replace(':', '', $req->{'bd_addr'});
         if(strlen($mac_addr) != 12){
-            throw new \Exception('mac_addr is invalid. ');
+            throw new \Exception('mac_addr is invalid. ', 201);
         }
 
         $sql = 'SELECT reg_id
@@ -90,7 +90,7 @@ class RegistrationModel extends Model
 
         if($stmt->rowCount() == 0){
             // already exist
-            throw new \Exception('The sensor is not already exist. ');
+            throw new \Exception('The sensor is not exist. ', 204);
         }
         else {
             $reg_id = $stmt->fetch()['reg_id'];
@@ -103,7 +103,7 @@ class RegistrationModel extends Model
                 return true;
             }
             else {
-                throw new \Exception('Cannot find valid reg_id ' . strval($reg_id));
+                throw new \Exception('Cannot find valid reg_id ' . strval($reg_id), 205);
             }
         }
     }

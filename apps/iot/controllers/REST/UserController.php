@@ -17,16 +17,21 @@ class UserController extends Controller
 {
     public function actionPostUserSignup(){
         // insert user data with status_auth 0
-        $this->getApp()->contentType('application/json');
+        // verification code submit to actionPostUserVerifyCode
+
+        $this->getApp()->contentType('text/html');
         $req = json_decode($this->getApp()->request->getBody());
         $user = new UserModel();
         //
         try{
+            // user pdo inserts a temporary record
+            // and generates verification code and insert the record.
             $user_id = $user->saveTemporaryUser($req);
         }
         catch (\Exception $e){
             $data = array(
-                'status' => 0,
+                'status' => false,
+                'code' => $e->getCode(),
                 'message' => $e->getMessage()
             );
             echo json_encode($data);
@@ -36,24 +41,28 @@ class UserController extends Controller
         $ver_record = $user->getVerificationCode($user_id);
         if(!is_bool($ver_record)){
             try {
-                $this->actionSendVerificationCode($ver_record['code']);
+                $this->actionSendVerificationCode($ver_record);
+                $data = array(
+                    'status' => true,
+                    'code' => 100,
+                    'message' => 'Success'
+                );
+                echo json_encode($data);
             }
             catch (\Exception $e){
                 $data = array(
-                    'status' => 0,
+                    'status' => false,
+                    'code' => 103,
                     'message' => 'Something wrong to send a mail. '
                 );
+                echo json_encode($data);
             }
-            $data = array(
-                'status' => 1,
-                'message' => 'Success'
-            );
-            echo json_encode($data);
         }
         else {
             $data = array(
-                'status' => 0,
-                'message' => 'ver_code is not exist.'
+                'status' => false,
+                'code' => 104,
+                'message' => 'ver_code is not generated.'
             );
             echo json_encode($data);
         }
@@ -70,20 +79,23 @@ class UserController extends Controller
         if (is_array($result)){
             if (password_verify($req->{'password'}, $result['passwd_hash'])){
                 $data = array(
-                    'status'=> 1,
+                    'status' => true,
+                    'code'=> 100,
                     'message'=> 'Success'
                 );
             }
             else {
                 $data = array(
-                    'status'=> 0,
+                    'status' => false,
+                    'code'=> 111,
                     'message'=> 'username or password is incorrect. '
                 );
             }
         }
         else {
             $data = array(
-                'status'=> 0,
+                'status' => false,
+                'code'=> 111,
                 'message'=> 'username or password is incorrect. '
             );
         }
@@ -98,13 +110,15 @@ class UserController extends Controller
         if (is_array($result)){
             if(count($result) > 0){
                 $data = array(
-                    'status'=> 1,
+                    'status' => true,
+                    'code'=> 100,
                     'message'=> 'Success'
                 );
             }
             else {
                 $data = array(
-                    'status'=> 0,
+                    'status' => false,
+                    'code'=> 112,
                     'message'=> 'Not Exist'
                 );
             }
@@ -112,26 +126,30 @@ class UserController extends Controller
         }
         else {
             $data = array(
-                'status'=> 0,
-                'message'=> 'Request form Error'
+                'status' => false,
+                'code'=> 113,
+                'message'=> 'Request form error'
             );
         }
         echo json_encode($data);
     }
     public function actionPostUserChangePassword(){
         // change user password
+        $this->getApp()->contentType('application/json');
         $req = json_decode($this->getApp()->request->getBody());
         $user = new UserModel();
         $result = $user->changePassword($req);
         if ($result){
             $data = array(
-                'status' => 1,
+                'status' => true,
+                'code' => 100,
                 'message' => 'Success'
             );
         }
         else {
             $data = array(
-                'status' => 0,
+                'status' => false,
+                'code' => 121,
                 'message' => 'Password is not correct. '
             );
         }
@@ -145,7 +163,8 @@ class UserController extends Controller
         $record = $reg->getRegistration($user_id);
         if (is_array($record)){
             $data = array(
-                'status' => 1,
+                'status' => true,
+                'code' => 100,
                 'message' => array()
             );
             foreach($record as $r){
@@ -154,7 +173,8 @@ class UserController extends Controller
         }
         else {
             $data = array(
-                'status' => 0,
+                'status' => false,
+                'code' => 131,
                 'message' => 'Request form is invalid. ',
             );
         }
@@ -169,20 +189,23 @@ class UserController extends Controller
             try{
                 $reg->saveRegistration($user_id, $req);
                 $data = array(
-                    'status' => 1,
+                    'status' => true,
+                    'code' =>100,
                     'message' => 'Success'
                 );
             }
             catch(\Exception $e){
                 $data = array(
-                    'status' => 0,
+                    'status' => false,
+                    'code' => $e->getCode(),
                     'message' => $e->getMessage()
                 );
             }
         }
         else {
             $data = array(
-                'status' => 0,
+                'status' => false,
+                'code' => 132,
                 'message' => 'Lack of required attributes. '
             );
         }
@@ -198,89 +221,82 @@ class UserController extends Controller
             try{
                 $reg->deleteRegistration($user_id, $req);
                 $data = array(
-                    'status' => 1,
+                    'status' => true,
+                    'code' => 100,
                     'message' => 'Success'
                 );
             }
             catch(\Exception $e){
                 $data = array(
-                    'status' => 0,
+                    'status' => false,
+                    'code' => $e->getCode(),
                     'message' => $e->getMessage()
                 );
             }
         }
         else {
             $data = array(
-                'status' => 0,
+                'status' => false,
+                'code' => 0,
                 'message' => 'Submitted form is invalid. '
             );
         }
 
         echo json_encode($data);
     }
-
-    public function actionSendVerificationCode($ver_code){
+    public function actionPostUserVerifyCode(){
+        $this->getApp()->contentType('text/html');
+        $req = json_decode($this->getApp()->request->getBody());
+        $user = new UserModel();
+        $record = $user->getVerificationCode($req->{'user-id'});
+        // check code validation
+        if ($record['code'] == trim($req->{'code'}) &&
+            strtotime($record['valid_date']) > $_SERVER['REQUEST_TIME']) {
+            // delete a ver_code record with user-id
+            $user->deleteVerificationCode($req->{'user-id'});
+            $data = array(
+                'status' => true,
+                'code' => 100,
+                'message' => 'Success'
+            );
+        }
+        else {
+            $data = array(
+                'status' => false,
+                'code' => 0,
+                'message' => 'Code is invalid. '
+            );
+        }
+        echo json_encode($data);
+    }
+    private function actionSendVerificationCode($ver_code_record){
         //SMTP needs accurate times, and the PHP time zone MUST be set
         //This should be done in your php.ini, but this is how to do it if you don't have access to that
-        date_default_timezone_set('Etc/UTC');
+        date_default_timezone_set('PST');
 
-        //Create a new PHPMailer instance
         $mail = new PHPMailer();
-        //Tell PHPMailer to use SMTP
         $mail->isSMTP();
-
-        //Enable SMTP debugging
-        // 0 = off (for production use)
-        // 1 = client messages
-        // 2 = client and server messages
         $mail->SMTPDebug = 0;
-
-        //Ask for HTML-friendly debug output
         $mail->Debugoutput = 'json';
-
-        //Set the hostname of the mail server
         $mail->Host = 'smtp.gmail.com';
-        // use
-        // $mail->Host = gethostbyname('smtp.gmail.com');
-        // if your network does not support SMTP over IPv6
-
-        //Set the SMTP port number - 587 for authenticated TLS, a.k.a. RFC4409 SMTP submission
         $mail->Port = 587;
-
-        //Set the encryption system to use - ssl (deprecated) or tls
         $mail->SMTPSecure = 'tls';
-
-        //Whether to use SMTP authentication
         $mail->SMTPAuth = true;
-        //Username to use for SMTP authentication - use full email address for gmail
         $mail->Username = "unsecureleo@gmail.com";
-        //Password to use for SMTP authentication
-        $mail->Password = "le0park!";
-        //Set who the message is to be sent from
-        $mail->setFrom('unsecureleo@gmail.com', 'Leo Park');
-
-        //Set who the message is to be sent to
-        $mail->addAddress('carpe0308@naver.com', 'Leo PARK');
+        $mail->Password = "teambaam!";
+        $mail->setFrom('unsecureleo@gmail.com', 'Sender');
+        $mail->addAddress($ver_code_record['email'], $ver_code_record['username']);
         //$mail->addAddress($record['email'], $record['username']);
 
         //Set the subject line
         $mail->Subject = 'Verification Code For Registering Account ';
 
-        //Read an HTML message body from an external file, convert referenced images to embedded,
-        //convert HTML into a basic plain-text alternative body
-//        $mail->msgHTML(file_get_contents('contents.html'), dirname(__FILE__));
         include '../../public/iot/mail_contents.php';
-        $mail->msgHTML(getMailContents($ver_code));
-        //Replace the plain text body with one created manually
-        //$mail->AltBody = 'This is a plain-text message body';
-
-        //send the message, check for errors
+        $mail->msgHTML(getMailContents($ver_code_record['code']));
         if (!$mail->send()) {
             throw new \Exception($mail->ErrorInfo);
         } else {
             return true;
         }
-        //Attach an image file
-//        $mail->addAttachment('images/phpmailer_mini.png');
     }
 }

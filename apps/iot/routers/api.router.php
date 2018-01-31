@@ -19,6 +19,12 @@ $app->group('/api', function () use ($app) {
         $app->post('/change/password', 'Iot\Controller\REST\UserController:actionPostUserChangePassword')
             ->name('post-user-change-password');
 
+        // Check user’s verification code. POST /users/verify/code
+        $app->post('/verify/code', 'Iot\Controller\REST\UserController:actionPostUserVerifyCode')
+            ->name('post-user-verify-code');
+
+
+
         // Show a list of user’s sensors.
         $app->get('/:user_id/sensor', 'Iot\Controller\REST\UserController:actionGetUserSensor')
             ->conditions(array('user_id' => '\d+'))

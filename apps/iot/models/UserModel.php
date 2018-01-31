@@ -56,7 +56,7 @@ class UserModel extends Model
         $stmt->execute(array($username));
 
         if ($stmt->rowCount() != 0){
-            throw new \Exception('duplicated username');
+            throw new \Exception('duplicated username', 101);
         }
 
         // check that email duplicated
@@ -67,7 +67,7 @@ class UserModel extends Model
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
         $stmt->execute(array($email));
         if ($stmt->rowCount() != 0){
-            throw new \Exception('duplicated email');
+            throw new \Exception('duplicated email', 102);
         }
 
         $passwd_hash = password_hash($password, PASSWORD_DEFAULT);
@@ -89,7 +89,7 @@ class UserModel extends Model
         $user_id = $this->getReadConnection()->lastInsertId();
         if (!$isSuccess){
             $this->getReadConnection()->rollBack();
-            throw new \Exception($stmt->errorInfo());
+            throw new \Exception($stmt->errorInfo(), $stmt->errorCode());
         }
         // insert a verification code record
         $this->makeVerificationCode($this->getReadConnection()->lastInsertId(), $reg_timestamp);
@@ -148,15 +148,15 @@ class UserModel extends Model
 
         if(!$isSuccess){
             $this->getReadConnection()->rollBack();
-            throw new \Exception($stmt->errorInfo());
+            throw new \Exception($stmt->errorInfo(), $stmt->errorCode());
         }
         return $this->getReadConnection()->lastInsertId();
     }
 
     // return array of ver_code record
     public function getVerificationCode($user_id){
-        $sql = 'SELECT code, valid_date
-                FROM ver_code
+        $sql = 'SELECT email, username, code, valid_date
+                FROM ver_code NATURAL JOIN user 
                 WHERE user_id = ?';
         $stmt = $this->getReadConnection()->prepare($sql);
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
@@ -168,6 +168,18 @@ class UserModel extends Model
             return $stmt->fetch();
         }
 
+    }
+    public function deleteVerificationCode($user_id){
+        $sql = 'DELETE FROM ver_code            
+                WHERE user_id = ?';
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->execute(array($user_id));
+        if ($stmt->rowCount() == 0){
+            return false;
+        }
+        else {
+            return true;
+        }
     }
 }
 
