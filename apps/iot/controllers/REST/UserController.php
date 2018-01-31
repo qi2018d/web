@@ -9,6 +9,8 @@
 namespace Iot\Controller\REST;
 use Iot\Model\RegistrationModel;
 use Iot\Model\UserModel;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\PHPMailer;
 use Slimvc\Core\Controller;
 
 class UserController extends Controller
@@ -20,7 +22,7 @@ class UserController extends Controller
         $user = new UserModel();
         //
         try{
-            $user->saveUser($req);
+            $user_id = $user->saveTemporaryUser($req);
         }
         catch (\Exception $e){
             $data = array(
@@ -31,11 +33,32 @@ class UserController extends Controller
             exit;
         }
 
-        $data = array(
-            'status' => 1,
-            'message' => 'Success'
-        );
-        echo json_encode($data);
+        $ver_record = $user->getVerificationCode($user_id);
+        if(!is_bool($ver_record)){
+            try {
+                $this->actionSendVerificationCode($ver_record['code']);
+            }
+            catch (\Exception $e){
+                $data = array(
+                    'status' => 0,
+                    'message' => 'Something wrong to send a mail. '
+                );
+            }
+            $data = array(
+                'status' => 1,
+                'message' => 'Success'
+            );
+            echo json_encode($data);
+        }
+        else {
+            $data = array(
+                'status' => 0,
+                'message' => 'ver_code is not exist.'
+            );
+            echo json_encode($data);
+        }
+
+
     }
     public function actionPostUserSignin(){
         // check email(or username) and password
@@ -116,7 +139,7 @@ class UserController extends Controller
     }
     public function actionGetUserSensor($user_id){
         // show all sensors of users.
-        $this->getApp()->contentType('application/json');
+        $this->getApp()->contentType('text/html');
 
         $reg = new RegistrationModel();
         $record = $reg->getRegistration($user_id);
@@ -194,5 +217,70 @@ class UserController extends Controller
         }
 
         echo json_encode($data);
+    }
+
+    public function actionSendVerificationCode($ver_code){
+        //SMTP needs accurate times, and the PHP time zone MUST be set
+        //This should be done in your php.ini, but this is how to do it if you don't have access to that
+        date_default_timezone_set('Etc/UTC');
+
+        //Create a new PHPMailer instance
+        $mail = new PHPMailer();
+        //Tell PHPMailer to use SMTP
+        $mail->isSMTP();
+
+        //Enable SMTP debugging
+        // 0 = off (for production use)
+        // 1 = client messages
+        // 2 = client and server messages
+        $mail->SMTPDebug = 0;
+
+        //Ask for HTML-friendly debug output
+        $mail->Debugoutput = 'json';
+
+        //Set the hostname of the mail server
+        $mail->Host = 'smtp.gmail.com';
+        // use
+        // $mail->Host = gethostbyname('smtp.gmail.com');
+        // if your network does not support SMTP over IPv6
+
+        //Set the SMTP port number - 587 for authenticated TLS, a.k.a. RFC4409 SMTP submission
+        $mail->Port = 587;
+
+        //Set the encryption system to use - ssl (deprecated) or tls
+        $mail->SMTPSecure = 'tls';
+
+        //Whether to use SMTP authentication
+        $mail->SMTPAuth = true;
+        //Username to use for SMTP authentication - use full email address for gmail
+        $mail->Username = "unsecureleo@gmail.com";
+        //Password to use for SMTP authentication
+        $mail->Password = "le0park!";
+        //Set who the message is to be sent from
+        $mail->setFrom('unsecureleo@gmail.com', 'Leo Park');
+
+        //Set who the message is to be sent to
+        $mail->addAddress('carpe0308@naver.com', 'Leo PARK');
+        //$mail->addAddress($record['email'], $record['username']);
+
+        //Set the subject line
+        $mail->Subject = 'Verification Code For Registering Account ';
+
+        //Read an HTML message body from an external file, convert referenced images to embedded,
+        //convert HTML into a basic plain-text alternative body
+//        $mail->msgHTML(file_get_contents('contents.html'), dirname(__FILE__));
+        include '../../public/iot/mail_contents.php';
+        $mail->msgHTML(getMailContents($ver_code));
+        //Replace the plain text body with one created manually
+        //$mail->AltBody = 'This is a plain-text message body';
+
+        //send the message, check for errors
+        if (!$mail->send()) {
+            throw new \Exception($mail->ErrorInfo);
+        } else {
+            return true;
+        }
+        //Attach an image file
+//        $mail->addAttachment('images/phpmailer_mini.png');
     }
 }
