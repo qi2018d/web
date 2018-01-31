@@ -29,12 +29,12 @@ class UserController extends Controller
             $user_id = $user->saveTemporaryUser($req);
         }
         catch (\Exception $e){
-            $data = array(
+            $res = array(
                 'status' => false,
                 'code' => $e->getCode(),
                 'message' => $e->getMessage()
             );
-            echo json_encode($data);
+            echo json_encode($res);
             exit;
         }
 
@@ -42,29 +42,32 @@ class UserController extends Controller
         if(!is_bool($ver_record)){
             try {
                 $this->actionSendVerificationCode($ver_record);
-                $data = array(
+                // store to SESSION ver-id data.
+                $_SESSION['ver_id'] = $ver_record['ver_id'];
+
+                $res = array(
                     'status' => true,
                     'code' => 100,
                     'message' => 'Success'
                 );
-                echo json_encode($data);
+                echo json_encode($res);
             }
             catch (\Exception $e){
-                $data = array(
+                $res = array(
                     'status' => false,
                     'code' => 103,
-                    'message' => 'Something wrong to send a mail. '
+                    'message' => 'Something wrong to send a mail. ' . $e->getMessage()
                 );
-                echo json_encode($data);
+                echo json_encode($res);
             }
         }
         else {
-            $data = array(
+            $res = array(
                 'status' => false,
                 'code' => 104,
                 'message' => 'ver_code is not generated.'
             );
-            echo json_encode($data);
+            echo json_encode($res);
         }
 
 
@@ -157,7 +160,7 @@ class UserController extends Controller
     }
     public function actionGetUserSensor($user_id){
         // show all sensors of users.
-        $this->getApp()->contentType('text/html');
+        $this->getApp()->contentType('application/json');
 
         $reg = new RegistrationModel();
         $record = $reg->getRegistration($user_id);
@@ -245,34 +248,38 @@ class UserController extends Controller
         echo json_encode($data);
     }
     public function actionPostUserVerifyCode(){
-        $this->getApp()->contentType('text/html');
+        $this->getApp()->contentType('application/json');
         $req = json_decode($this->getApp()->request->getBody());
         $user = new UserModel();
-        $record = $user->getVerificationCode($req->{'user-id'});
+        $record = $user->getVerificationCode($req->{'user_id'});
         // check code validation
         if ($record['code'] == trim($req->{'code'}) &&
             strtotime($record['valid_date']) > $_SERVER['REQUEST_TIME']) {
             // delete a ver_code record with user-id
-            $user->deleteVerificationCode($req->{'user-id'});
-            $data = array(
+            $user->deleteVerificationCode($req->{'ver_id'});
+            // update a user record status_auth column.
+            $user->updateUserStatusAuth($req->{'user_id'});
+            // delete a ver-id data in SESSION
+            unset($_SESSION['ver_id']);
+            $res = array(
                 'status' => true,
                 'code' => 100,
                 'message' => 'Success'
             );
         }
         else {
-            $data = array(
+            $res = array(
                 'status' => false,
                 'code' => 0,
                 'message' => 'Code is invalid. '
             );
         }
-        echo json_encode($data);
+        echo json_encode($res);
     }
     private function actionSendVerificationCode($ver_code_record){
         //SMTP needs accurate times, and the PHP time zone MUST be set
         //This should be done in your php.ini, but this is how to do it if you don't have access to that
-        date_default_timezone_set('PST');
+        date_default_timezone_set('Etc/UTC');
 
         $mail = new PHPMailer();
         $mail->isSMTP();

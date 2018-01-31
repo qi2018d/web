@@ -36,12 +36,12 @@ class RegistrationModel extends Model
     }
 
     public function saveRegistration($user_id, $req){
-        $mac_addr = mac_address_str2hex($req->{'bd_addr'});
+        $mac_addr = mac_address_str2hex($req['bd_addr']);
         if(strlen($mac_addr) != 12){
             throw new \Exception('mac_addr is invalid. ', 201);
         }
 
-        $name = $req->{'name'};
+        $name = $req['name'];
         $sql = 'SELECT reg_id
                 FROM registration
                 WHERE user_id = ? AND CONV(mac_addr, 10, 16) = ?';
@@ -70,7 +70,7 @@ class RegistrationModel extends Model
     }
 
     public function deleteRegistration($user_id, $req){
-        $mac_addr = str_replace(':', '', $req->{'bd_addr'});
+        $mac_addr = str_replace(':', '', $req['bd_addr']);
         if(strlen($mac_addr) != 12){
             throw new \Exception('mac_addr is invalid. ', 201);
         }

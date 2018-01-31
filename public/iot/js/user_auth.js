@@ -88,29 +88,40 @@ $("#signup-form").submit(function(){
     var name = $("#inputName").val();
     var password = $("#inputPassword").val();
     var confirm = $("#inputPasswordConfirm").val();
+    var birth = $("#inputBirthdate").val();
+    var gender = $("input[name='gender']:checked").val();
 
 
     var format_check = isValidSignupFormat(email, name, password, confirm);
 
     if(format_check.status){
-        alert('success');
 
-        var req_body = {
-            contentType: 'application/json',
-            data: JSON.stringify({ "email": email, "username":name, "password" : password})
+        var data = {
+            "email": email,
+            "username":name,
+            "password" : password,
+            "birthdate" : birth,
+            "gender" : gender
         };
 
-        /*
-        $.post("api/user/signup", req_body, function(result){
-            var res = JSON.parse(result);
+        $.ajax({
+            type: "POST",
+            url: "/api/user/signup",
+            contentType: "application/json",
+            data: JSON.stringify(data), // <-- Put comma here
+            success: function(result){
+                alert(result);
+                var res = result;
 
-            // if sign-in success
-            if(res.status == )
+                // if sign-in success
+                if(res.status === true){
+                    alert('success');
+                    $.cookie("ver_email", email);
+                    window.location = '/signup/validation';
+                }
+            }
         });
-        */
-        alert('success');
-        $.cookie("ver_email", email);
-        window.location = '/signup/validation';
+
     }
     else{
         alert(format_check.message);

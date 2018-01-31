@@ -155,7 +155,7 @@ class UserModel extends Model
 
     // return array of ver_code record
     public function getVerificationCode($user_id){
-        $sql = 'SELECT email, username, code, valid_date
+        $sql = 'SELECT ver_id, email, username, code, valid_date
                 FROM ver_code NATURAL JOIN user 
                 WHERE user_id = ?';
         $stmt = $this->getReadConnection()->prepare($sql);
@@ -167,18 +167,33 @@ class UserModel extends Model
         else {
             return $stmt->fetch();
         }
-
     }
-    public function deleteVerificationCode($user_id){
+
+    public function deleteVerificationCode($ver_id){
         $sql = 'DELETE FROM ver_code            
-                WHERE user_id = ?';
+                WHERE ver_id = ?';
         $stmt = $this->getReadConnection()->prepare($sql);
-        $stmt->execute(array($user_id));
+        $stmt->execute(array($ver_id));
         if ($stmt->rowCount() == 0){
             return false;
         }
         else {
             return true;
+        }
+    }
+
+    public function updateUserStatusAuth($user_id){
+        $sql = 'UPDATE user
+                SET status_auth = 1
+                WHERE user_id = ?';
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $isSuccess = $stmt->execute(array($user_id));
+
+        if($isSuccess){
+            return true;
+        }
+        else {
+            return false;
         }
     }
 }
