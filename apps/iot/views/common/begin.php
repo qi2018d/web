@@ -13,7 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="stylesheet" href="/css/normalize.css">
-    <link rel="stylesheet" href="/css/font-awesome.css">
+    <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/style.css">
     <script src="http://code.jquery.com/jquery-3.3.1.min.js"
@@ -21,6 +21,7 @@
             crossorigin="anonymous"></script>
     <script src="/js/jquery.cookie-1.4.1.min.js"></script>
     <script src="/js/modernizr-2.6.2.min.js"></script>
+    <script src="/js/main.js"></script>
 </head>
 <body>
     <?php require 'sidebar.php' ?>

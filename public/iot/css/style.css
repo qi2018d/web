@@ -572,8 +572,6 @@ h3.profile-title {
   color: #6cc0f7;
 }
 
-
-
 .user-form{
     margin: 0 auto;
     max-width: 350px;
@@ -597,5 +595,18 @@ h3.profile-title {
 }
 .user-auth-form button{
     margin-top: 30px;
+}
+
+
+.fas{
+  vertical-align: middle;
+}
+
+.sidebar-li{
+  vertical-align: middle;
+}
+
+.navigation li a{
+  font-size: 19px;
 }
 

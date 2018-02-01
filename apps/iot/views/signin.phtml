@@ -9,7 +9,7 @@
                     <img id="profile-img" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" />
                     <p id="profile-name"></p>
                     <form id="signin-form" class="user-auth-form" novalidate="novalidate">
-                        <input type="email" id="inputEmail" class="form-control" placeholder="Email or User name" required autofocus>
+                        <input type="text" id="inputIdentifier" class="form-control" placeholder="Email or User name" required autofocus>
                         <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
                         <!--div id="remember" class="checkbox">
                             <label>
@@ -21,6 +21,46 @@
                     <br/>
                     <a href="/signup">Sign up</a><br/>
                     <a href="/forgotpw">Forgot the password?</a>
+
+                    <script>
+                        $("#signin-form").submit(function(){
+
+                            // valid user input format
+                            var identifier = $("#inputIdentifier").val();
+                            var password = $("#inputPassword").val();
+
+                            var format_check = isValidSignInFormat(identifier, password);
+
+                            if(format_check.status){
+
+                                var data = {
+                                    "identifier":identifier,
+                                    "password" : password,
+                                };
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/api/user/signin",
+                                    contentType: "application/json",
+                                    data: JSON.stringify(data), // <-- Put comma here
+                                    success: function(result){
+
+                                        // if sign-in success
+                                        if(result.status === true){
+                                            window.location = '/';
+                                        }
+                                        else{
+                                            alert(result);
+                                        }
+
+                                    }
+                                });
+                            }
+                            else
+                                alert(format_check.message);
+
+                            return false;
+                        });
+                    </script>
                 </div>
             </div>
             <?php require 'common/footer.php' ?>

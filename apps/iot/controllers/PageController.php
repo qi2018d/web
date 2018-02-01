@@ -13,6 +13,7 @@ class PageController extends Controller
     var $title = 'QI 2018 Winter Team D';
     var $team_name = 'Team D';
 
+
     public function actionHome()
     {
         $this->getApp()->contentType('text/html');
@@ -22,42 +23,83 @@ class PageController extends Controller
         $this->render("home.phtml", $data);
     }
 
-    public function actionSignin()
+    public function actionSignup()
     {
-        $this->getApp()->contentType('text/html');
-        $data = array(
-            "title" => $this->title,
-            "team_name" => $this->team_name);
-        $this->render("signin.phtml", $data);
 
+        if(!$this->isSignedIn()) {
+            $this->getApp()->contentType('text/html');
+            $data = array(
+                "title" => $this->title,
+                "team_name" => $this->team_name);
+            $this->render("signup.phtml", $data);
+        }
+        else
+            $this->getApp()->redirect('/');
     }
     public function actionSignupValidation()
     {
         $this->getApp()->contentType('text/html');
-        /*
-        if(isset($_SESSION["ver_id"])){
+
+        if($this->isOnVerification()){
             $data = array(
                 "title" => $this->title,
                 "team_name" => $this->team_name);
             $this->render("validation.phtml", $data);
         }
         else
-        {
-            $this->getApp()->status(404);
-        }
-        */
-        $data = array(
-            "title" => $this->title,
-            "team_name" => $this->team_name);
-        $this->render("validation.phtml", $data);
+            $this->getApp()->redirect('/');
     }
-    public function actionSignup()
+
+    public function actionSignin()
     {
-        $this->getApp()->contentType('text/html');
-        $data = array(
-            "title" => $this->title,
-            "team_name" => $this->team_name);
-        $this->render("signup.phtml", $data);
+        if(!$this->isSignedIn()){
+
+            $this->getApp()->contentType('text/html');
+            $data = array(
+                "title" => $this->title,
+                "team_name" => $this->team_name);
+
+            $this->render("signin.phtml", $data);
+        }
+        else
+            $this->getApp()->redirect('/');
+    }
+
+    public function actionUser(){
+
+        if($this->isSignedIn()) {
+            $this->getApp()->contentType('text/html');
+            $data = array(
+                "title" => $this->title,
+                "team_name" => $this->team_name);
+            $this->render("user.phtml", $data);
+        }
+        else
+            $this->getApp()->redirect('/signin');
+    }
+    public function actionUserChangePassword(){
+
+        if($this->isSignedIn()) {
+            $this->getApp()->contentType('text/html');
+            $data = array(
+                "title" => $this->title,
+                "team_name" => $this->team_name);
+            $this->render("changepw.phtml", $data);
+        }
+        else
+            $this->getApp()->redirect('/signin');
+    }
+    public function actionUserCancelID(){
+
+        if($this->isSignedIn()) {
+            $this->getApp()->contentType('text/html');
+            $data = array(
+                "title" => $this->title,
+                "team_name" => $this->team_name);
+            $this->render("cancelid.phtml", $data);
+        }
+        else
+            $this->getApp()->redirect('/signin');
     }
 
     public function actionMap()
@@ -68,6 +110,18 @@ class PageController extends Controller
             "team_name" => $this->team_name);
         $this->render("map.phtml", $data);
     }
+    public function actionSensor(){
+
+        if($this->isSignedIn()) {
+            $this->getApp()->contentType('text/html');
+            $data = array(
+                "title" => $this->title,
+                "team_name" => $this->team_name);
+            $this->render("sensor.phtml", $data);
+        }
+        else
+            $this->getApp()->redirect('/signin');
+    }
     public function actionDevelopers()
     {
         $this->getApp()->contentType('text/html');
@@ -77,4 +131,11 @@ class PageController extends Controller
         $this->render("developers.phtml", $data);
     }
 
+
+    public function isOnVerification(){
+        return isset($_SESSION['ver_id']);
+    }
+    public function isSignedIn(){
+        return isset($_SESSION['user_id']);
+    }
 }

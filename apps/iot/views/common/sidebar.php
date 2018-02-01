@@ -37,18 +37,36 @@
     </div> <!-- top-section -->
     <div class="main-navigation">
         <ul class="navigation">
-            <li><a href="/"><i class="fa fa-smile-o"></i>Welcome</a></li>
-            <li><a href="/map"><i class="fa fa-globe"></i>Air Map</a></li>
+            <li class="sidebar-li"><a href="/" id="home-menu"><i class="fas fa-angle-double-right"></i>Welcome</a></li>
+            <li class="sidebar-li"><a href="/map" id="map-menu"><i class="fas fa-globe"></i>Air Map</a></li>
 
             <?php if(isset($_SESSION["user_id"])) :?>
-                <li><a href="/sensor"><i class="fa fa-bluetooth"></i>Sensor</a></li>
-                <li><a href="/signin"><i class="fa fa-pencil"></i>Sign out</a></li>
+                <li class="sidebar-li"><a href="/user" id="user-menu"><i class="fas fa-user"></i>User</a></li>
+                <li class="sidebar-li"><a href="/sensor" id="sensor-menu"><i class="fab fa-bluetooth-b"></i>Sensor</a></li>
+                <li class="sidebar-li"><a href="/" id="signout-menu"><i class="fas fa-sign-out-alt"></i>Sign out</a></li>
             <?php else: ?>
-                <li><a href="/signin"><i class="fa fa-pencil"></i>Sign in</a></li>
+                <li class="sidebar-li"><a href="/signin" id="signin-menu"><i class="fas fa-sign-in-alt"></i>Sign in</a></li>
             <?php endif; ?>
-            <li><a href="/developers"><i class="fa fa-link"></i>Contact us</a></li>
+            <li class="sidebar-li"><a href="/developers" id="developer-menu"><i class="fas fa-link"></i>Contact us</a></li>
         </ul>
     </div> <!-- .main-navigation -->
+    <script>
+        $("#signout-menu").click(function(){
+
+            $.ajax({
+                type: "GET",
+                url: "/api/user/signout",
+                contentType: "application/json",
+                success: function(result){
+
+                    // if sign-in success
+                    if(result.status === true){
+                        window.location = '/';
+                    }
+                }
+            });
+        });
+    </script>
 
     <!--div class="social-icons">
         <ul>

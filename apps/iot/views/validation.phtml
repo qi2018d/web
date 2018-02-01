@@ -12,6 +12,31 @@
                         <input type="text" id="inputCode" class="form-control" placeholder="Validation code" required autofocus>
                         <button class="btn btn-lg btn-primary btn-block btn-signin" type="submit">Validate</button>
                     </form><!-- /form -->
+                    <script>
+                        $("#validation-form").submit(function(){
+
+                            var code = $("#inputCode").val();
+                            var data = {"code": code};
+
+                            alert(code);
+                            $.ajax({
+                                type: "POST",
+                                url: "/api/user/verify/code",
+                                contentType: "application/json",
+                                data: JSON.stringify(data), // <-- Put comma here
+                                success: function(result){
+
+                                    alert(result);
+
+                                    // if sign-in success
+                                    if(result.status === true){
+                                        window.location = '/';
+                                    }
+                                }
+                            });
+                            return false;
+                        });
+                    </script>
                 </div>
             </div>
             <?php require 'common/footer.php' ?>

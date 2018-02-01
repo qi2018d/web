@@ -11,6 +11,9 @@ $app->group('/api', function () use ($app) {
         $app->post('/signin', 'Iot\Controller\REST\UserController:actionPostUserSignin')
             ->name('post-user-signin');
 
+        $app->get('/signout', 'Iot\Controller\REST\UserController:actionPostUserSignout')
+            ->name('post-user-signout');
+
         // Check an email to know existence user account. POST /api/users/exist
         $app->post('/exist', 'Iot\Controller\REST\UserController:actionPostUserExist')
             ->name('post-user-is-exist');
@@ -22,6 +25,14 @@ $app->group('/api', function () use ($app) {
         // Check user’s verification code. POST /users/verify/code
         $app->post('/verify/code', 'Iot\Controller\REST\UserController:actionPostUserVerifyCode')
             ->name('post-user-verify-code');
+
+        $app->group('/info', function () use ($app) {
+            $app->get('/', 'Iot\Controller\REST\UserController:actionPostCurrentUserInfo')
+                ->name('post-my-info');
+            $app->get('/:user_id', 'Iot\Controller\REST\UserController:actionPostUserInfo')
+                ->conditions(array('user_id' => '\d+'))
+                ->name('post-user-info');
+        });
 
 
 

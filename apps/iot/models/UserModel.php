@@ -12,27 +12,25 @@ use Slimvc\Core\Model;
 class UserModel extends Model
 {
     // get a user record with email or username
-    public function getUser($req){
-        if(isset($req->{'email'})){
-            // if req has email
-            $email = $req->{'email'};
-            $sql = "SELECT user_id, email, username, passwd_hash
-                    FROM user
-                    WHERE email = ?";
-            $stmt = $this->getReadConnection()->prepare($sql);
-            $stmt->setFetchMode(\PDO::FETCH_ASSOC);
-            $stmt->execute(array(strval($email)));
-        }
-        else {
-            // if req has username
-            $username = $req->{'username'};
-            $sql = "SELECT user_id, email, username, passwd_hash
-                    FROM user
-                    WHERE username = ?";
-            $stmt = $this->getReadConnection()->prepare($sql);
-            $stmt->setFetchMode(\PDO::FETCH_ASSOC);
-            $stmt->execute(array(strval($username)));
-        }
+    public function getUser($identifier){
+
+        $sql = "SELECT user_id, email, username, passwd_hash
+                FROM user
+                WHERE email = ? OR username = ?";
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        $stmt->execute(array(strval($identifier), strval($identifier)));
+
+        return $stmt->fetch();
+    }
+
+    public function getCurrentUser(){
+        $sql = "SELECT user_id, email, username, passwd_hash
+                FROM user
+                WHERE user_id = ?";
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        $stmt->execute(array(strval($_SESSION['user_id'])));
 
         return $stmt->fetch();
     }
@@ -42,11 +40,13 @@ class UserModel extends Model
     // if success, return user_id of record
     // else return false;
     public function saveTemporaryUser($req){
+
         $username = $req->{'username'};
         $email = $req->{'email'};
         $password = $req->{'password'};
         $birth = $req->{'birthdate'};
         $gender = $req->{'gender'};
+
         // check username
         $sql = 'SELECT user_id, username
                 FROM user
@@ -140,7 +140,9 @@ class UserModel extends Model
 
         $sql = "INSERT INTO ver_code (user_id, code, valid_date)
                 VALUES (:user_id, :code, :valid_date)";
-        $stmt = $this->getReadConnection()->prepare($sql);
+
+        $pdo = $this->getReadConnection();
+        $stmt = $pdo ->prepare($sql);
         $stmt->bindParam(':user_id', $user_id, FILTER_SANITIZE_NUMBER_INT);
         $stmt->bindParam(':code', $code, FILTER_SANITIZE_STRING);
         $stmt->bindParam(':valid_date', $valid_datetime, FILTER_SANITIZE_STRING);
@@ -150,17 +152,20 @@ class UserModel extends Model
             $this->getReadConnection()->rollBack();
             throw new \Exception($stmt->errorInfo(), $stmt->errorCode());
         }
-        return $this->getReadConnection()->lastInsertId();
+
+        $_SESSION['ver_id'] = $this->getReadConnection()->lastInsertId();
     }
 
     // return array of ver_code record
-    public function getVerificationCode($user_id){
-        $sql = 'SELECT ver_id, email, username, code, valid_date
+    public function getVerificationCode(){
+
+        $sql = 'SELECT ver_id, user_id, email, username, code, valid_date
                 FROM ver_code NATURAL JOIN user 
-                WHERE user_id = ?';
+                WHERE ver_id = ?';
+
         $stmt = $this->getReadConnection()->prepare($sql);
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
-        $stmt->execute(array($user_id));
+        $stmt->execute(array($_SESSION['ver_id']));
         if ($stmt->rowCount() == 0){
             return false;
         }
@@ -169,11 +174,11 @@ class UserModel extends Model
         }
     }
 
-    public function deleteVerificationCode($ver_id){
+    public function deleteVerificationCode(){
         $sql = 'DELETE FROM ver_code            
                 WHERE ver_id = ?';
         $stmt = $this->getReadConnection()->prepare($sql);
-        $stmt->execute(array($ver_id));
+        $stmt->execute(array($_SESSION['ver_id']));
         if ($stmt->rowCount() == 0){
             return false;
         }
