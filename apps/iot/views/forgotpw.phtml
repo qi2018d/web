@@ -1,0 +1,58 @@
+<?php require 'common/begin.php' ?>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+    <div class="content-wrapper">
+        <div class="page-section" id="about">
+            <div class="row">
+                <div class="user-form">
+                    <form id="forgotpw-form" class="user-auth-form" novalidate="novalidate">
+                        <input type="email" id="inputEmail" class="form-control" placeholder="Email" required autofocus>
+                        <button class="btn btn-lg btn-primary btn-block btn-signin" type="submit">Send verification code</button>
+                    </form><!-- /form -->
+                    <br/>
+                    <script>
+                        $("#forgotpw-form").submit(function(){
+
+                            // valid user input format
+                            var email = $("#inputEmail").val();
+
+                            if(isEmail(email)){
+
+                                var data = {
+                                    "email": email,
+                                };
+
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/api/user/forgotpw",
+                                    contentType: "application/json",
+                                    data: JSON.stringify(data),
+                                    success: function(result){
+
+                                        // if sign-in success
+                                        if(result.status === true){
+                                            $.cookie("ver_email", email);
+                                            window.location = '/forgotpw/validation';
+                                        }
+                                    }
+
+
+                                });
+                            }
+                            else{
+                                alert(format_check.message);
+                            }
+                            return false;
+                        });
+                    </script>
+
+                </div>
+            </div>
+            <?php require 'common/footer.php' ?>
+        </div>
+    </div>
+</div>
+<?php require 'common/end.php' ?>
+
+

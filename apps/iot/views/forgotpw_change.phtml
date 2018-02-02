@@ -7,7 +7,6 @@
             <div class="row">
                 <div class="user-form">
                     <form id="changepw-form" class="user-auth-form" novalidate="novalidate">
-                        <input type="password" id="inputCurrentPassword" class="form-control" placeholder="Current Password" required>
                         <input type="password" id="inputNewPassword" class="form-control" placeholder="New Password" required>
                         <input type="password" id="inputConfirm" class="form-control" placeholder="Confirmation" required>
                         <button class="btn btn-lg btn-primary btn-block btn-signin" type="submit">Change Password!</button>
@@ -18,28 +17,24 @@
                         $("#changepw-form").submit(function(){
 
                             // valid user input format
-                            var current_pw = $("#inputCurrentPassword").val();
                             var new_pw = $("#inputNewPassword").val();
                             var confirm = $("#inputConfirm").val();
 
-                            var format_check = isValidChangepwFormat(current_pw, new_pw, confirm);
-
-                            if(format_check.status){
+                            if(isValidForgotpwChangeFormat(new_pw, confirm)){
 
                                 var data = {
-                                    "current_pw":current_pw,
                                     "new_pw" : new_pw
                                 };
 
                                 $.ajax({
                                     type: "POST",
-                                    url: "/api/user/changepw",
-                                    data: JSON.stringify(data), // <-- Put comma here
+                                    url: "/api/user/forgotpw/change",
+                                    data: JSON.stringify(data),
                                     success: function(res){
 
                                         if(res.status === true){
                                             alert("Password change successfully!");
-                                            window.location = '/user';
+                                            window.location = '/signin';
                                         }
                                         else
                                             alert(res.message);

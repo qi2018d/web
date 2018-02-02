@@ -40,11 +40,11 @@ class PageController extends Controller
     {
         $this->getApp()->contentType('text/html');
 
-        if($this->isOnVerification()){
+        if($this->isOnSignupVerification()){
             $data = array(
                 "title" => $this->title,
                 "team_name" => $this->team_name);
-            $this->render("validation.phtml", $data);
+            $this->render("signup_validation.phtml", $data);
         }
         else
             $this->getApp()->redirect('/');
@@ -64,6 +64,53 @@ class PageController extends Controller
         else
             $this->getApp()->redirect('/');
     }
+
+    public function actionForgotpw(){
+        if(!$this->isSignedIn()){
+
+            $this->getApp()->contentType('text/html');
+            $data = array(
+                "title" => $this->title,
+                "team_name" => $this->team_name);
+
+            $this->render("forgotpw.phtml", $data);
+        }
+        else
+            $this->getApp()->redirect('/');
+    }
+    public function actionForgotpwValidation()
+    {
+        $this->getApp()->contentType('text/html');
+
+        if($this->isOnForgotpwVerification()){
+            $data = array(
+                "title" => $this->title,
+                "team_name" => $this->team_name);
+            $this->render("forgotpw_validation.phtml", $data);
+        }
+        else
+            $this->getApp()->redirect('/');
+    }
+    public function actionForgotpwChange(){
+        $this->getApp()->contentType('text/html');
+
+        /*$data = array(
+            "title" => $this->title,
+            "team_name" => $this->team_name);
+        $this->render("forgotpw_change.phtml", $data);
+        */
+
+        if($this->isOnForgotpwVerification()){
+            $data = array(
+                "title" => $this->title,
+                "team_name" => $this->team_name);
+            $this->render("forgotpw_change.phtml", $data);
+        }
+        else
+            $this->getApp()->redirect('/');
+
+    }
+
 
     public function actionUser(){
 
@@ -85,18 +132,6 @@ class PageController extends Controller
                 "title" => $this->title,
                 "team_name" => $this->team_name);
             $this->render("changepw.phtml", $data);
-        }
-        else
-            $this->getApp()->redirect('/signin');
-    }
-    public function actionUserCancelID(){
-
-        if($this->isSignedIn()) {
-            $this->getApp()->contentType('text/html');
-            $data = array(
-                "title" => $this->title,
-                "team_name" => $this->team_name);
-            $this->render("cancelid.phtml", $data);
         }
         else
             $this->getApp()->redirect('/signin');
@@ -132,8 +167,11 @@ class PageController extends Controller
     }
 
 
-    public function isOnVerification(){
-        return isset($_SESSION['ver_id']);
+    public function isOnSignupVerification(){
+        return isset($_SESSION['signup_ver_id']);
+    }
+    public function isOnForgotpwVerification(){
+        return isset($_SESSION['forgotpw_ver_id']);
     }
     public function isSignedIn(){
         return isset($_SESSION['user_id']);

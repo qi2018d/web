@@ -42,14 +42,14 @@
                                     url: "/api/user/signin",
                                     contentType: "application/json",
                                     data: JSON.stringify(data), // <-- Put comma here
-                                    success: function(result){
+                                    success: function(res){
 
                                         // if sign-in success
-                                        if(result.status === true){
+                                        if(res['status'] === true){
                                             window.location = '/';
                                         }
                                         else{
-                                            alert(result);
+                                            alert(res['message']);
                                         }
 
                                     }

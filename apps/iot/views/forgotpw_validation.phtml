@@ -18,19 +18,16 @@
                             var code = $("#inputCode").val();
                             var data = {"code": code};
 
-                            alert(code);
                             $.ajax({
                                 type: "POST",
-                                url: "/api/user/verify/code",
+                                url: "/api/user/forgotpw/verify",
                                 contentType: "application/json",
-                                data: JSON.stringify(data), // <-- Put comma here
+                                data: JSON.stringify(data),
                                 success: function(result){
-
-                                    alert(result);
 
                                     // if sign-in success
                                     if(result.status === true){
-                                        window.location = '/';
+                                        window.location = '/forgotpw/change';
                                     }
                                 }
                             });

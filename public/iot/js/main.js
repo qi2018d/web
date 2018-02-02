@@ -42,3 +42,26 @@ function isValidSignupFormat(email, name, password, confirm_pw){
     return {status:true};
 
 }
+
+function isValidChangepwFormat(current_pw, new_pw, confirm)
+{
+    if(new_pw !== confirm)
+        return {status: false, message: "Confirmation doesn't match with new password"};
+
+    if(!isPassword(new_pw))
+        return {status: false, message: "Invalid password format"};
+
+    return {status: true};
+}
+
+
+function isValidForgotpwChangeFormat(new_pw, confirm)
+{
+    if(new_pw !== confirm)
+        return {status: false, message: "Confirmation doesn't match with new password"};
+
+    if(!isPassword(new_pw))
+        return {status: false, message: "Invalid password format"};
+
+    return {status: true};
+}

@@ -5,7 +5,11 @@ $app->group('/api', function () use ($app) {
     $app->group('/user', function () use ($app){
         // Register a user account. POST /api/users/add
         $app->post('/signup', 'Iot\Controller\REST\UserController:actionPostUserSignup')
-            ->name('post-signup-users');
+            ->name('post-user-signup');
+        // Check user’s verification code. POST /users/verify/code
+        $app->post('/signup/verify', 'Iot\Controller\REST\UserController:actionPostUserSignupVerifyCode')
+            ->name('post-user-signup-verify-code');
+
 
         // Check user’s account is valid POST /api/users/signin
         $app->post('/signin', 'Iot\Controller\REST\UserController:actionPostUserSignin')
@@ -19,21 +23,27 @@ $app->group('/api', function () use ($app) {
             ->name('post-user-is-exist');
 
         // Change user’s password. POST /users/change/password
-        $app->post('/change/password', 'Iot\Controller\REST\UserController:actionPostUserChangePassword')
+        $app->post('/changepw', 'Iot\Controller\REST\UserController:actionPostUserChangePassword')
             ->name('post-user-change-password');
 
-        // Check user’s verification code. POST /users/verify/code
-        $app->post('/verify/code', 'Iot\Controller\REST\UserController:actionPostUserVerifyCode')
-            ->name('post-user-verify-code');
+        $app->post('/forgotpw', 'Iot\Controller\REST\UserController:actionPostUserForgotpw')
+            ->name('post-user-forgotpw');
+        $app->post('/forgotpw/verify', 'Iot\Controller\REST\UserController:actionPostUserForgotpwVerifyCode')
+            ->name('post-user-forgotpw-verify-code');
+        $app->post('/forgotpw/change', 'Iot\Controller\REST\UserController:actionPostUserForgotpwChange')
+            ->name('post-user-forgotpw-verify-code');
+
 
         $app->group('/info', function () use ($app) {
-            $app->get('/', 'Iot\Controller\REST\UserController:actionPostCurrentUserInfo')
+            $app->get('/', 'Iot\Controller\REST\UserController:actionGetCurrentUserInfo')
                 ->name('post-my-info');
-            $app->get('/:user_id', 'Iot\Controller\REST\UserController:actionPostUserInfo')
+            $app->get('/:user_id', 'Iot\Controller\REST\UserController:actionGetUserInfo')
                 ->conditions(array('user_id' => '\d+'))
                 ->name('post-user-info');
         });
 
+        $app->get('/cancelid', 'Iot\Controller\REST\UserController:actionGetUserCancelID')
+            ->name('get-user-cancelid');
 
 
         // Show a list of user’s sensors.

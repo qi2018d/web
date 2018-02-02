@@ -39,7 +39,7 @@ class UserController extends Controller
             exit;
         }
 
-        $verification = $user->getVerificationCode();
+        $verification = $user->getSignupVerificationCode();
         if(!is_bool($verification)){
             try {
                 $this->actionSendVerificationCode($verification);
@@ -69,52 +69,23 @@ class UserController extends Controller
             echo json_encode($res);
         }
     }
-    private function actionSendVerificationCode($ver_code_record){
-        //SMTP needs accurate times, and the PHP time zone MUST be set
-        //This should be done in your php.ini, but this is how to do it if you don't have access to that
-        date_default_timezone_set('Etc/UTC');
-
-        $mail = new PHPMailer();
-        $mail->isSMTP();
-        $mail->SMTPDebug = 0;
-        $mail->Debugoutput = 'json';
-        $mail->Host = 'smtp.gmail.com';
-        $mail->Port = 587;
-        $mail->SMTPSecure = 'tls';
-        $mail->SMTPAuth = true;
-        $mail->Username = "unsecureleo@gmail.com";
-        $mail->Password = "teambaam!";
-        $mail->setFrom('unsecureleo@gmail.com', 'Sender');
-        $mail->addAddress($ver_code_record['email'], $ver_code_record['username']);
-        //$mail->addAddress($record['email'], $record['username']);
-
-        //Set the subject line
-        $mail->Subject = 'Verification Code For Registering Account ';
-
-        include '../../public/iot/mail_contents.php';
-        $mail->msgHTML(getMailContents($ver_code_record['code']));
-        if (!$mail->send()) {
-            throw new \Exception($mail->ErrorInfo);
-        } else {
-            return true;
-        }
-    }
-    public function actionPostUserVerifyCode(){
+    public function actionPostUserSignupVerifyCode(){
 
         $this->getApp()->contentType('application/json');
         $input_code = json_decode($this->getApp()->request->getBody()) -> {'code'};
 
         $user = new UserModel();
 
-        $verification = $user->getVerificationCode();
+        $verification = $user->getSignupVerificationCode();
 
         // check code validation
         if ($verification['code'] == trim($input_code)
             && strtotime($verification['valid_date']) > $_SERVER['REQUEST_TIME']) {
 
             // delete validation record, update user status
-            $user->deleteVerificationCode();
-            unset($_SESSION['ver_id']);
+            $user->deleteSignupVerificationCode();
+            unset($_SESSION['signup_ver_id']);
+
             $user->updateUserStatusAuth($verification['user_id']);
 
             $_SESSION['user_id'] = $verification['user_id'];
@@ -213,43 +184,201 @@ class UserController extends Controller
     public function actionPostUserChangePassword(){
         // change user password
         $this->getApp()->contentType('application/json');
-        $req = json_decode($this->getApp()->request->getBody());
-        $user = new UserModel();
-        $result = $user->changePassword($req);
+
+
+        $json = json_decode($this->getApp()->request->getBody());
+        $current_pw = $json->current_pw;
+        $new_pw = $json->new_pw;
+
+        $result = (new UserModel())->changePassword($current_pw, $new_pw);
+
         if ($result){
             $data = array(
+                "status" => true,
+                "code" => 100,
+                "message" => "Success"
+            );
+            echo json_encode($data);
+
+        }
+        else {
+            $data = array(
+                'status' => false,
+                'code' => 121,
+                'message' => 'Current password is not correct'
+            );
+            echo json_encode($data);
+        }
+
+    }
+    public function actionGetUserCancelID(){
+        // change user password
+        $this->getApp()->contentType('application/json');
+        (new UserModel())->cancelID();
+        unset($_SESSION['user_id']);
+    }
+
+
+    /* forgot password */
+    public function actionPostUserForgotpw(){
+        // insert user data with status_auth 0
+        // verification code submit to actionPostUserVerifyCode
+
+        $user = new UserModel();
+
+        $this->getApp()->contentType('application/json');
+
+        $email = json_decode($this->getApp()->request->getBody())->email;
+        $record = $user->getUser($email);
+        $user_id = $record['user_id'];
+
+
+        $user->makeForgotpwVerificationCode($user_id, $_SERVER['REQUEST_TIME']);
+        $verification = $user->getForgotpwVerificationCode();
+
+        //echo $_SESSION['forgotpw_ver_id'];
+
+        if(!is_bool($verification)){
+            try {
+                $this->actionSendVerificationCode($verification);
+
+                $res = array(
+                    'status' => true,
+                    'code' => 100,
+                    'message' => 'Success'
+                );
+                echo json_encode($res);
+            }
+            catch (\Exception $e){
+                $res = array(
+                    'status' => false,
+                    'code' => 103,
+                    'message' => 'Something wrong to send a mail. ' . $e->getMessage()
+                );
+                echo json_encode($res);
+            }
+        }
+        else {
+            $res = array(
+                'status' => false,
+                'code' => 104,
+                'message' => 'ver_code is not generated.'
+            );
+            echo json_encode($res);
+        }
+
+    }
+    public function actionPostUserForgotpwVerifyCode(){
+
+        $this->getApp()->contentType('application/json');
+        $input_code = json_decode($this->getApp()->request->getBody()) -> {'code'};
+
+        $user = new UserModel();
+
+        $verification = $user->getForgotpwVerificationCode();
+
+        // check code validation
+        if ($verification['code'] == trim($input_code)
+            && strtotime($verification['valid_date']) > $_SERVER['REQUEST_TIME']) {
+
+            $_SESSION['user_id'] = $verification['user_id'];
+
+            // delete validation record, update user status
+            $user->deleteForgotpwVerificationCode();
+
+            $res = array(
                 'status' => true,
                 'code' => 100,
                 'message' => 'Success'
             );
         }
         else {
+            $res = array(
+                'status' => false,
+                'code' => 0,
+                'message' => 'Code is invalid. '
+            );
+        }
+        echo json_encode($res);
+    }
+    public function actionPostUserForgotpwChange(){
+        // change user password
+        $this->getApp()->contentType('application/json');
+
+        $json = json_decode($this->getApp()->request->getBody());
+        $new_pw = $json->new_pw;
+
+        $result = (new UserModel())->changeForgotPassword($new_pw);
+        unset($_SESSION['forgotpw_ver_id']);
+        unset($_SESSION['user_id']);
+
+        if ($result){
+            $data = array(
+                "status" => true,
+                "code" => 100,
+                "message" => "Success"
+            );
+            echo json_encode($data);
+
+        }
+        else {
             $data = array(
                 'status' => false,
                 'code' => 121,
-                'message' => 'Password is not correct. '
+                'message' => 'Current password is not correct'
             );
+            echo json_encode($data);
         }
-        echo json_encode($data);
+
     }
 
     /* user data */
-    public function actionPostCurrentUserInfo(){
+    public function actionGetCurrentUserInfo(){
 
         $user_info = (new UserModel())->getCurrentUser();
         $res = array(
             'status' => true,
             'user_id' => $user_info['user_id'],
             'email' => $user_info['email'],
-            'username' => $user_info['username'],
+            'username' => $user_info['username']
         );
         echo json_encode($res);
     }
-    public function actionPostUserInfo(){
+    public function actionGetUserInfo(){
         //TODO
     }
 
 
+    private function actionSendVerificationCode($ver_code_record){
+        //SMTP needs accurate times, and the PHP time zone MUST be set
+        //This should be done in your php.ini, but this is how to do it if you don't have access to that
+        date_default_timezone_set('Etc/UTC');
+
+        $mail = new PHPMailer();
+        $mail->isSMTP();
+        $mail->SMTPDebug = 0;
+        $mail->Debugoutput = 'json';
+        $mail->Host = 'smtp.gmail.com';
+        $mail->Port = 587;
+        $mail->SMTPSecure = 'tls';
+        $mail->SMTPAuth = true;
+        $mail->Username = "unsecureleo@gmail.com";
+        $mail->Password = "teambaam!";
+        $mail->setFrom('unsecureleo@gmail.com', 'Sender');
+        $mail->addAddress($ver_code_record['email'], $ver_code_record['username']);
+        //$mail->addAddress($record['email'], $record['username']);
+
+        //Set the subject line
+        $mail->Subject = 'Verification Code For Registering Account ';
+
+        include '../../public/iot/mail_contents.php';
+        $mail->msgHTML(getMailContents($ver_code_record['code']));
+        if (!$mail->send()) {
+            throw new \Exception($mail->ErrorInfo);
+        } else {
+            return true;
+        }
+    }
 
     public function actionGetUserSensor($user_id){
         // show all sensors of users.
