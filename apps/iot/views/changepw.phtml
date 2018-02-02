@@ -37,12 +37,13 @@
                                     data: JSON.stringify(data), // <-- Put comma here
                                     success: function(res){
 
+
                                         if(res.status === true){
                                             alert("Password change successfully!");
                                             window.location = '/user';
                                         }
                                         else
-                                            alert(res.message);
+                                            alert(json['message']);
                                     }
                                 });
                             }

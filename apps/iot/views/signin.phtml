@@ -35,23 +35,21 @@
 
                                 var data = {
                                     "identifier":identifier,
-                                    "password" : password,
+                                    "password" : password
                                 };
                                 $.ajax({
                                     type: "POST",
                                     url: "/api/user/signin",
-                                    contentType: "application/json",
-                                    data: JSON.stringify(data), // <-- Put comma here
-                                    success: function(res){
+                                    data: JSON.stringify(data),
 
-                                        // if sign-in success
-                                        if(res['status'] === true){
+                                    success: function(response){
+
+                                        var res = JSON.parse(response);
+
+                                        if(res['status'] === true)
                                             window.location = '/';
-                                        }
-                                        else{
+                                        else
                                             alert(res['message']);
-                                        }
-
                                     }
                                 });
                             }

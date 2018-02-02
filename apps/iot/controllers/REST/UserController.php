@@ -17,13 +17,11 @@ class UserController extends Controller
 {
     /* sign up */
     public function actionPostUserSignup(){
-        // insert user data with status_auth 0
-        // verification code submit to actionPostUserVerifyCode
 
-        $this->getApp()->contentType('application/json');
         $req = json_decode($this->getApp()->request->getBody());
+
         $user = new UserModel();
-        //
+
         try{
             // user pdo inserts a temporary record
             // and generates verification code and insert the record.
@@ -36,7 +34,7 @@ class UserController extends Controller
                 'message' => $e->getMessage()
             );
             echo json_encode($res);
-            exit;
+            return;
         }
 
         $verification = $user->getSignupVerificationCode();
@@ -71,7 +69,6 @@ class UserController extends Controller
     }
     public function actionPostUserSignupVerifyCode(){
 
-        $this->getApp()->contentType('application/json');
         $input_code = json_decode($this->getApp()->request->getBody()) -> {'code'};
 
         $user = new UserModel();
@@ -108,40 +105,26 @@ class UserController extends Controller
 
     /* sign in & sign out */
     public function actionPostUserSignin(){
-        // check email(or username) and password
-        $this->getApp()->contentType('application/json');
+
         $req = json_decode($this->getApp()->request->getBody());
 
-        $user = new UserModel();
-        $result = $user->getUser($req->{'identifier'});
+        $identifier = $req->identifier;
+        $password = $req->password;
 
-        if (is_array($result)){
-            if (password_verify($req->{'password'}, $result['passwd_hash'])){
+        $user = (new UserModel())->getUserByID($identifier);
 
-                $_SESSION['user_id'] = $result['user_id'];
+        if (is_array($user)) {
+            if (password_verify($password, $user['passwd_hash'])) {
 
-                $data = array(
-                    'status' => true,
-                    'code'=> 100,
-                    'message'=> 'Success'
-                );
-            }
-            else {
-                $data = array(
-                    'status' => false,
-                    'code'=> 111,
-                    'message'=> 'password is incorrect. '
-                );
+                //$_SESSION['status'] = 'sign-in';
+                $_SESSION['user_id'] = $user['user_id'];
+
+                echo json_encode(array('status' => true, 'message' => 'Success'));
+                return;
             }
         }
-        else {
-            $data = array(
-                'status' => false,
-                'code'=> 111,
-                'message'=> 'user name is incorrect. '
-            );
-        }
-        echo json_encode($data);
+
+        echo json_encode(array('status' => false, 'message' => 'User name or Password is incorrect'));
     }
     public function actionPostUserSignout(){
         unset($_SESSION['user_id']);
@@ -154,7 +137,7 @@ class UserController extends Controller
         $this->getApp()->contentType('application/json');
         $req = json_decode($this->getApp()->request->getBody());
         $user = new UserModel();
-        $result = $user->getUser($req);
+        $result = $user->getUserByID($req);
         if (is_array($result)){
             if(count($result) > 0){
                 $data = array(
@@ -229,7 +212,7 @@ class UserController extends Controller
         $this->getApp()->contentType('application/json');
 
         $email = json_decode($this->getApp()->request->getBody())->email;
-        $record = $user->getUser($email);
+        $record = $user->getUserByID($email);
         $user_id = $record['user_id'];
 
 

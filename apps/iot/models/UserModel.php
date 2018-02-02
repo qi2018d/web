@@ -254,7 +254,7 @@ class UserModel extends Model
 
         return $stmt->fetch();
     }
-    public function getUser($identifier){
+    public function getUserByID($identifier){
 
         $sql = "SELECT user_id, email, username, passwd_hash
                 FROM user
