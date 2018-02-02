@@ -1,0 +1,92 @@
+<?php require 'common/begin.php' ?>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="content-wrapper">
+            <div class="page-section" id="about">
+                <div class="row">
+                    <!--div class="user-form-wrapper"-->
+                    <div class="user-form">
+                        <form id="signup-form" class="user-auth-form" novalidate="novalidate">
+                            <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+                            <input type="name" id="inputName" class="form-control" placeholder="User Name" required autofocus>
+                            <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+                            <input type="password" id="inputPasswordConfirm" class="form-control" placeholder="Confirm Password" required>
+                            <input type="date" id="inputBirthdate" class="form-control" placeholder="Birth day">
+                            <div>
+                                <div style="padding-left: 20px">
+                                    <label class="radio inline" for="gender-0" style="float: left;">
+                                        <input name="gender" id="gender-0" value="1" checked="checked" type="radio">
+                                        Male
+                                    </label>
+                                </div>
+                                <div style="padding-left: 95px">
+                                    <label class="radio inline" for="gender-1" style="float: left;">
+                                        <input name="gender" id="gender-1" value="2" type="radio">
+                                        Female
+                                    </label>
+                                </div>
+                            </div>
+                            <!--div id="remember" class="checkbox">
+                                <label>
+                                    <input type="checkbox" value="remember-me"> Remember me
+                                </label>
+                            </div-->
+                            <button class="btn btn-lg btn-primary btn-block btn-signin" type="submit">Sign up</button>
+                        </form><!-- /form -->
+                        <script>
+                            $("#signup-form").submit(function(){
+
+                                // valid user input format
+                                var email = $("#inputEmail").val();
+                                var name = $("#inputName").val();
+                                var password = $("#inputPassword").val();
+                                var confirm = $("#inputPasswordConfirm").val();
+                                var birth = $("#inputBirthdate").val();
+                                var gender = $("input[name='gender']:checked").val();
+
+
+                                var format_check = isValidSignupFormat(email, name, password, confirm);
+
+                                if(format_check.status){
+
+                                    var data = {
+                                        "email": email,
+                                        "username":name,
+                                        "password" : password,
+                                        "birthdate" : birth,
+                                        "gender" : gender
+                                    };
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "/api/user/signup",
+                                        contentType: "application/json",
+                                        data: JSON.stringify(data), // <-- Put comma here
+                                        success: function(result){
+
+                                            // if sign-in success
+                                            if(result.status === true){
+                                                alert('Please check your email');
+                                                $.cookie("ver_email", email);
+                                                window.location = '/signup/validation';
+                                            }
+                                        }
+                                    });
+                                }
+                                else{
+                                    alert(format_check.message);
+                                }
+                                return false;
+                            });
+                        </script>
+                        <br/>
+                        <a href="/signin">Sign in</a><br/>
+                    </div>
+
+                    <!--/div-->
+                </div>
+                <?php require 'common/footer.php' ?>
+            </div>
+        </div>
+    </div>
+<?php require 'common/end.php' ?>

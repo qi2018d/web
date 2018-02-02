@@ -1,0 +1,54 @@
+<?php require 'common/begin.php' ?>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="fluid-container">
+            <div class="content-wrapper">
+                <!-- ABOUT -->
+                <div class="page-section" id="about">
+                <div class="row">
+                    <div class="user-form">
+                        <img id="profile-img" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" />
+                        <p id="profile-name"></p>
+                        <p id="profile-email"></p>
+                        <script>
+                            $.ajax({
+                                type: "GET",
+                                url: "/api/user/info",
+                                success: function(res){
+
+                                    var result = JSON.parse(res);
+
+                                    // if sign-in success
+                                    if(result.status === true){
+                                        $("#profile-name").text(result['username']);
+                                        $("#profile-email").text(result['email']);
+                                    }
+                                }
+                            });
+                        </script>
+                        <br/>
+
+                        <a href="/user/changepw">Change Password</a><br/>
+                        <a href="" id="cancel-id-button">Cancel ID</a>
+                        <script>
+                            $("#cancel-id-button").click(function () {
+                                var answer = confirm('Really want to cancel your ID?\nYou will lose all your sensor data');
+                                if (answer === true){
+                                    $.ajax({
+                                        type: "GET",
+                                        async: false,
+                                        url: "/api/user/cancelid",
+                                    });
+                                    window.location.href = '/';
+                                }
+                            });
+                        </script>
+                    </div>
+                </div> <!-- #about -->
+                </div>
+                <?php require 'common/footer.php' ?>
+            </div>
+        </div>
+    </div>
+<?php require 'common/end.php' ?>

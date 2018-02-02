@@ -1,0 +1,45 @@
+<?php require 'common/begin.php' ?>
+<!-- MAIN CONTENT -->
+<div class="main-content">
+    <div class="content-wrapper">
+        <div class="page-section" id="about">
+            <div class="row">
+                <div class="user-form">
+                    <form id="validation-form" class="user-auth-form" novalidate="novalidate">
+                        <p>Validation code sent to </p>
+                        <p id="validation-email-p"></p>
+                        <script>$("#validation-email-p").text($.cookie('ver_email'));</script>
+                        <input type="text" id="inputCode" class="form-control" placeholder="Validation code" required autofocus>
+                        <button class="btn btn-lg btn-primary btn-block btn-signin" type="submit">Validate</button>
+                    </form><!-- /form -->
+                    <script>
+                        $("#validation-form").submit(function(){
+
+                            var code = $("#inputCode").val();
+                            var data = {"code": code};
+
+                            $.ajax({
+                                type: "POST",
+                                url: "/api/user/forgotpw/verify",
+                                contentType: "application/json",
+                                data: JSON.stringify(data),
+                                success: function(result){
+
+                                    // if sign-in success
+                                    if(result.status === true){
+                                        window.location = '/forgotpw/change';
+                                    }
+                                }
+                            });
+                            return false;
+                        });
+                    </script>
+                </div>
+            </div>
+            <?php require 'common/footer.php' ?>
+        </div>
+    </div>
+</div>
+<?php require 'common/end.php' ?>
+
+
