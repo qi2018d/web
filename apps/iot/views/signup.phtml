@@ -70,6 +70,9 @@
                                                 $.cookie("ver_email", email);
                                                 window.location = '/signup/validation';
                                             }
+                                            else {
+                                                alert(result.code + ": " + result.message);
+                                            }
                                         }
                                     });
                                 }
