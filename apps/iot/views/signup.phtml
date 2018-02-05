@@ -62,17 +62,19 @@
                                         url: "/api/user/signup",
                                         contentType: "application/json",
                                         data: JSON.stringify(data), // <-- Put comma here
-                                        success: function(result){
+                                        success: function(response){
+
+                                            var res = JSON.parse(response);
+
 
                                             // if sign-in success
-                                            if(result.status === true){
+                                            if(res['status'] === true){
                                                 alert('Please check your email');
                                                 $.cookie("ver_email", email);
                                                 window.location = '/signup/validation';
                                             }
-                                            else {
-                                                alert(result.code + ": " + result.message);
-                                            }
+                                            else
+                                                alert(res['message']);
                                         }
                                     });
                                 }

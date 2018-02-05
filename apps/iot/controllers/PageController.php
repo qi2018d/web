@@ -157,6 +157,13 @@ class PageController extends Controller
         else
             $this->getApp()->redirect('/signin');
     }
+
+    public function actionCharts(){
+        $data = array(
+            "title" => $this->title,
+            "team_name" => $this->team_name);
+        $this->getApp()->render("charts.phtml", $data);
+    }
     public function actionDevelopers()
     {
         $this->getApp()->contentType('text/html');

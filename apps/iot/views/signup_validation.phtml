@@ -23,12 +23,16 @@
                                 url: "/api/user/signup/verify",
                                 contentType: "application/json",
                                 data: JSON.stringify(data), // <-- Put comma here
-                                success: function(result){
+                                success: function(response){
 
-                                    // if sign-in success
-                                    if(result.status === true){
+                                    var res = JSON.parse(response);
+
+                                    if(res['status'] === true) {
+                                        alert('Sign up success!');
                                         window.location = '/';
                                     }
+                                    else
+                                        alert(res['message']);
                                 }
                             });
                             return false;

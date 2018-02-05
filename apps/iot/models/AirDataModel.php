@@ -36,7 +36,7 @@ class AirDataModel extends Model
         // 0130 PROBLEM NOW WE AIR DATA REG_ID NOT FETCHEDl
         // assign request data to variables.
         $user_id = $req->{'user-id'};
-        $mac_addr = mac_address_str2hex($req->{'bd_addr'});
+        $mac_addr = mac_address_str2hex($req->{'bd-addr'});
 
         // get registration record with user_id, mac_addr
         $sql = 'SELECT reg_id 
@@ -64,9 +64,9 @@ class AirDataModel extends Model
         $stmt->bindParam('o3', $req->{'data'}->{'o3'}, FILTER_SANITIZE_NUMBER_INT);
         $stmt->bindParam('pm2_5', $req->{'data'}->{'pm2_5'}, FILTER_SANITIZE_NUMBER_INT);
         $stmt->bindParam('pm10', $req->{'data'}->{'pm10'}, FILTER_SANITIZE_NUMBER_INT);
-        $stmt->bindParam('temperature', $req->{'data'}->{'temperature'}, FILTER_SANITIZE_NUMBER_INT);
-        $stmt->bindParam('lat', $req->{'data'}->{'location'}->{'lat'}, FILTER_SANITIZE_NUMBER_FLOAT);
-        $stmt->bindParam('lng', $req->{'data'}->{'location'}->{'lng'}, FILTER_SANITIZE_NUMBER_FLOAT);
+        $stmt->bindParam('temperature', $req->{'data'}->{'temperature'}, FILTER_SANITIZE_NUMBER_FLOAT);
+        $stmt->bindParam('lat', $req->{'location'}->{'lat'}, FILTER_SANITIZE_NUMBER_FLOAT);
+        $stmt->bindParam('lng', $req->{'location'}->{'lng'}, FILTER_SANITIZE_NUMBER_FLOAT);
         $stmt->execute();
 
         if($stmt->rowCount() > 0){
