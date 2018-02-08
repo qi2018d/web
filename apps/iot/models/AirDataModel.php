@@ -6,11 +6,11 @@
  * Time: 오후 8:02
  */
 
+
 namespace Iot\Model;
-
-
 use Slimvc\Core\Model;
-include '../../public/iot/functions.php';
+
+
 class AirDataModel extends Model
 {
 // fetch a recent-most heart data
@@ -35,13 +35,14 @@ class AirDataModel extends Model
     public function saveAirData($req){
         // 0130 PROBLEM NOW WE AIR DATA REG_ID NOT FETCHEDl
         // assign request data to variables.
+        include '../../public/iot/functions.php';
         $user_id = $req->{'user-id'};
         $mac_addr = mac_address_str2hex($req->{'bd-addr'});
 
         // get registration record with user_id, mac_addr
         $sql = 'SELECT reg_id 
                 FROM registration
-                WHERE user_id = ? AND mac_addr = ?';
+                WHERE user_id = ? AND HEX(mac_addr) = ?';
         $stmt = $this->getReadConnection()->prepare($sql);
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
         $stmt->execute(array($user_id, $mac_addr));
@@ -55,6 +56,7 @@ class AirDataModel extends Model
         // insert new air quality data.
         $sql = 'INSERT INTO airq_data (reg_id, timestamp, co, so2, no2, o3, pm2_5, pm10, temperature, lat, lng)
                 VALUES (:reg_id, :timestamp, :co, :so2, :no2, :o3, :pm2_5, :pm10, :temperature, :lat, :lng)';
+
         $stmt = $this->getReadConnection()->prepare($sql);
         $stmt->bindParam('reg_id', $reg_record['reg_id'],FILTER_SANITIZE_NUMBER_INT);
         $stmt->bindParam('timestamp', $req->{'timestamp'},FILTER_SANITIZE_STRING);
@@ -78,5 +80,31 @@ class AirDataModel extends Model
             return false;
         }
 
+    }
+
+    public function getBoundaryAirData($boundary){
+        $realtime_timestamp = $_SERVER['REQUEST_TIME']; // - 86400 * 2;
+        $realtime_datetime = date('Y-m-d H:i:s', $realtime_timestamp);
+
+        $sql = "SELECT co, so2, no2, o3, pm2_5, temperature, lat, lng
+                FROM airq_data
+                WHERE lat > ? AND lng > ? AND lat < ? AND lng < ?"; // AND timestamp > ?";
+
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        $stmt->execute(array($boundary->{'south'}, $boundary->{'west'}, $boundary->{'north'}, $boundary->{'east'}));//, $realtime_datetime));
+        return $stmt->fetchAll();
+    }
+
+    public function getUserAirData($user_id){
+        $sql = "SELECT co, so2, no2, o3, pm2_5, temperature, timestamp
+                FROM airq_data_user
+                WHERE user_id = ?
+                ORDER BY timestamp DESC"; // AND timestamp > ?;
+
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        $stmt->execute(array($user_id));//, $realtime_datetime));
+        return $stmt->fetchAll();
     }
 }

@@ -1,47 +1,135 @@
 // Load the Visualization API and the corechart package.
-google.charts.load('current', {'packages':['line']});
+var chart_records = [[{label: 'Time', type: 'date'},
+                    {label: 'CO', type: 'number'},
+                    {label: 'NO2', type: 'number'},
+                    {label: 'PM2.5', type: 'number'}]];
+var columnsToShow = [0];
 
-// Set a callback to run when the Google Visualization API is loaded.
-google.charts.setOnLoadCallback(drawChart);
+$.ajax({
+    type:"GET",
+    dataType: "json",
+    url: "http://teamd-iot.calit2.net/api/data/read/charts",
+    contentType: "application/json",
+    success: function(results) {
+        results.message.forEach(function(record){
+            chart_records.push([new Date(record.timestamp), record.co, record.no2, record.pm2_5]);
+        });
 
-// Callback that creates and populates a data table,
-// instantiates the pie chart, passes in the data and
-// draws it.
-function drawChart() {
+        google.charts.load('current', {'packages':['line', 'controls']});
+        // Set a callback to run when the Google Visualization API is loaded.
+        google.charts.setOnLoadCallback(drawChart);
 
-    var data = new google.visualization.DataTable();
-    data.addColumn('number', 'Day');
-    data.addColumn('number', 'Guardians of the Galaxy');
-    data.addColumn('number', 'The Avengers');
-    data.addColumn('number', 'Transformers: Age of Extinction');
+        // Callback that creates and populates a data table,
+        // instantiates the pie chart, passes in the data and
+        // draws it.
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable(chart_records);
+            // var dashboard = new google.visualization.Dashboard(document.getElementById('dashboard_div'));
+            var categorySelector = new google.visualization.ControlWrapper({
+                'controlType': 'CategoryFilter',
+                'containerId': 'category_div',
+                'dataTable': chart_records,
+                'options': {
+                    'filterColumnIndex': 1,
+                    'values' : ['CO', 'NO2', 'PM2.5'],
+                    'ui': {
+                        'labelStacking': 'vertical',
+                        'label': 'Sensor Selection',
+                        'allowTyping': false,
+                        'allowMultiple': false
+                    }
+                }
+            });
 
-    data.addRows([
-        [1,  37.8, 80.8, 41.8],
-        [2,  30.9, 69.5, 32.4],
-        [3,  25.4,   57, 25.7],
-        [4,  11.7, 18.8, 10.5],
-        [5,  11.9, 17.6, 10.4],
-        [6,   8.8, 13.6,  7.7],
-        [7,   7.6, 12.3,  9.6],
-        [8,  12.3, 29.2, 10.6],
-        [9,  16.9, 42.9, 14.8],
-        [10, 12.8, 30.9, 11.6],
-        [11,  5.3,  7.9,  4.7],
-        [12,  6.6,  8.4,  5.2],
-        [13,  4.8,  6.3,  3.6],
-        [14,  4.2,  6.2,  3.4]
-    ]);
+            var rangeFilter = new google.visualization.ControlWrapper({
+                'controlType': 'ChartRangeFilter',
+                'containerId': 'range_div',
+                'dataTable': chart_records,
+                'options': {
+                    'filterColumnIndex': 1,
+                    'ui': {
+                        'chartType': 'LineChart',
+                        'chartOptions': {
+                            'chartArea': {'height': '100', 'width' :'100%'},
+                            'hAxis': {'textPosition': 'in'}
+                        }
+                    }
+                }
+            });
 
-    var options = {
-        chart: {
-            title: 'Box Office Earnings in First Two Weeks of Opening',
-            subtitle: 'in millions of dollars (USD)'
-        },
-        width: 900,
-        height: 500
-    };
+            // Create a range slider, passing some options
+            var lineChart = new google.visualization.ChartWrapper({
+                'chartType': 'LineChart',
+                'containerId': 'chart_div',
+                'dataTable': chart_records,
+                'options': {
+                    'width': '100%',
+                    'height': 500,
+                    'title': 'Historical Air Quality Data',
+                    'subtitle': 'in particles per million (PPM)',
+                }
+            });
+            /*var chart = new google.charts.Line(document.getElementById('linechart_material'));
+            chart.draw(data, google.charts.Line.convertOptions(options));*/
+            // dashboard.bind(rangeFilter, lineChart);
+            google.visualization.events.addListener(categorySelector, 'statechange', function () {
+                var selectedSensor = categorySelector.getState().selectedValues[0];
+                if (typeof selectedSensor != 'undefined'){
+                    columnsToShow = [0];
+                    //Finds which column to show
+                    for (x = 0; x < data.getNumberOfColumns(); x++){
+                        if (data.getColumnLabel(x) == selectedSensor){
+                            columnsToShow[1] = x;
+                            break;
+                        }
+                    }
+                    //Changing color to "red" to maintain the color of the second column, even if it's shown alone.
+                    if (x == 1){
+                        lineChart.setOption('colors',['#3366cc']);
+                        rangeFilter.setOption('ui.chartOptions.colors',['#3366cc']);
+                    }else if(x == 2){
+                        lineChart.setOption('colors',['#dc3912']);
+                        rangeFilter.setOption('ui.chartOptions.colors',['#dc3912']);
+                    }else if(x == 3){
+                        lineChart.setOption('colors',['#ff9900']);
+                        rangeFilter.setOption('ui.chartOptions.colors',['#ff9900']);
+                    }
+                    //Sets the view to the correct thing
+                    rangeFilter.setView({ columns: columnsToShow });
+                    lineChart.setView({ columns: columnsToShow });
+                }
+                else {
+                    columnsToShow = [0, 1, 2, 3];
 
-    var chart = new google.charts.Line(document.getElementById('linechart_material'));
+                    lineChart.setOption('colors', null);
+                    rangeFilter.setOption('ui.chartOptions.colors', null);
 
-    chart.draw(data, google.charts.Line.convertOptions(options));
-}
+                    rangeFilter.setView(null);
+                    lineChart.setView(null);
+                }
+                lineChart.draw();
+                rangeFilter.draw();
+            });
+
+            google.visualization.events.addListener(rangeFilter, 'statechange', function () {
+                var state = rangeFilter.getState();
+                var view = new google.visualization.DataView(data);
+                var filteredRows = view.getFilteredRows([{ column: 0, minValue: state.range.start, maxValue: state.range.end }]);
+
+                if(columnsToShow.length != 1) {
+                    view.setColumns(columnsToShow);
+                    lineChart.setView({ columns: columnsToShow, rows: filteredRows });
+                } else {
+                    lineChart.setView({ rows: filteredRows });
+                }
+                lineChart.draw();
+            });
+
+            lineChart.draw();
+            categorySelector.draw();
+            rangeFilter.draw();
+        }
+    }
+});
+
+

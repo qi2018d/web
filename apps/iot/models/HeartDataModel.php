@@ -10,7 +10,6 @@ namespace Iot\Model;
 
 
 use Slimvc\Core\Model;
-include '../../public/iot/functions.php';
 
 class HeartDataModel extends Model
 {
@@ -34,9 +33,10 @@ class HeartDataModel extends Model
     }
 
     public function saveHeartData($req){
+        include '../../public/iot/functions.php';
         // assign request data to variables.
         $user_id = $req->{'user-id'};
-        $mac_addr = mac_address_str2hex($req->{'bd_addr'});
+        $mac_addr = mac_address_str2hex($req->{'bd-addr'});
 
         // get registration record with user_id, mac_addr
         $sql = 'SELECT reg_id 

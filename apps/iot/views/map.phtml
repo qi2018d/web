@@ -10,20 +10,135 @@
                     <div id="air-map"></div>
                     <script>
                         var map;
+                        var mapClusterData;
+                        // var mapRawData;
+                        // var markers = [];
+                        // var locations = [];
+                        /*function clearOverlays() {
+                            for (var i = 0; i < markers.length; i++ ) {
+                                markers[i].setMap(null);
+                            }
+                            markers.length = 0;
+                        }*/
+
+                        function clearFeatures(){
+                            map.data.forEach(function(feature){
+                                map.data.remove(feature);
+                            });
+                        }
+
                         function initMap() {
                             map = new google.maps.Map(document.getElementById('air-map'), {
                                 center: {lat:32.8787614, lng:-117.2349534},
-                                zoom: 15
+                                zoom: 12
                             });
+
+
+                            map.data.setStyle(function(feature) {
+                                var concentration = feature.getProperty('co');
+                                return {
+                                    title: feature.getProperty('co'),
+                                    icon: getCircle(concentration)
+                                };
+                            });
+
+
+                            google.maps.event.addListener(map, "dragend", function(){
+                                clearFeatures();
+                                getAirData(map.getBounds());
+                            });
+                            google.maps.event.addListener(map, "zoom_changed", function(){
+                                clearFeatures();
+                                getAirData(map.getBounds());
+                            });
+                            google.maps.event.addListener(map, "projection_changed", function(){
+                                clearFeatures();
+                                getAirData(map.getBounds());
+                            });
+
 
                         }
 
-                    </script>
-                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC94R7siOtY7X9L0P-9pTzQiCn7V2hbCaI&callback=initMap" async defer></script>
+                        function getCircle(concentration) {
+                            return {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                fillColor: 'red',
+                                fillOpacity: .2,
+                                scale: Math.pow(2, concentration * 7) / 2,
+                                strokeColor: 'white',
+                                strokeWeight: .5
+                            };
+                        }
+                        /*function getBlueCircle(concentration) {
+                            return {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                fillColor: 'blue',
+                                fillOpacity: .2,
+                                scale: Math.pow(2, concentration * 5) / 2,
+                                strokeColor: 'white',
+                                strokeWeight: .5
+                            };
+                        }*/
 
+                        function getAirData(res){
+                            $.ajax({
+                                type:"POST",
+                                dataType: "json",
+                                url: "http://teamd-iot.calit2.net/api/data/read/maps/geojson",
+                                data: JSON.stringify(res),
+                                contentType: "application/json",
+                                success: function(results) {
+                                    if(typeof mapClusterData != 'undefined')
+                                        mapClusterData.setMap(null);
+
+                                    var features = results.message.features;
+                                    var coordinates = [];
+
+                                    features.forEach(feature => {
+                                        coordinates.push(feature.geometry.coordinates);
+                                    });
+
+                                    clusterMaker.iterations(2500);
+                                    clusterMaker.data(coordinates);
+
+
+                                    var centroids = [];
+                                    clusterMaker.clusters().forEach(result => {
+                                        centroids.push(result.centroid);
+                                    });
+
+                                    var reduced = getReducedFeatures(features, centroids);
+                                    mapClusterData = new google.maps.Data();
+                                    mapClusterData.addGeoJson(reduced);
+                                    mapClusterData.setStyle(function(feature) {
+                                        var concentration = feature.getProperty('co');
+                                        return {
+                                            title: feature.getProperty('co'),
+                                            icon: getCircle(concentration)
+                                        };
+                                    });
+
+                                    /*mapRawData = new google.maps.Data();
+                                    mapRawData.addGeoJson(results.message);
+                                    mapRawData.setStyle(function(feature) {
+                                        var concentration = feature.getProperty('co');
+                                        return {
+                                            title: feature.getProperty('co'),
+                                            icon: getBlueCircle(concentration)
+                                        };
+                                    });
+*/
+                                    mapClusterData.setMap(map);
+                                    // mapRawData.setMap(map);
+                                }
+                            });
+                        }
+                    </script>
+                    <script src="js/kmeans.js"></script>
+                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC94R7siOtY7X9L0P-9pTzQiCn7V2hbCaI&callback=initMap" async defer></script>
                 </div>
                 <?php require 'common/footer.php' ?>
-
+                <div class="content-wrapper content-text"></div>
             </div>
         </div>
     </div>

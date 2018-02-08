@@ -193,6 +193,7 @@ class UserModel extends Model
         $sql = "UPDATE user 
                 SET passwd_hash = ?
                 WHERE user_id = ?";
+
         $stmt = $this->getReadConnection()->prepare($sql);
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
         return $stmt->execute(array(password_hash($new_pw, PASSWORD_DEFAULT), $user_id));

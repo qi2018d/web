@@ -6,6 +6,28 @@
             <div class="content-wrapper">
                 <div class="page-section" id="about">
                 <div class="row">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th scope="col" class="col-xs-2">Sensor ID</th>
+                            <th scope="col" class="col-xs-6">Name</th>
+                            <th scope="col" class="col-xs-3">Mac Address</th>
+                            <th scope="col" class="col-xs-1">Edit</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                        foreach($registration as $record)
+                            echo '<tr class="table-active">
+                            <th scope="row"><p>' . $record['reg_id'] . '</p></th>
+                            <td><p>' . $record['name'] . '</p></td>
+                            <td><p>' . $record['bd_addr'] . '</p></td>
+                            <td> <a class="btn btn-default" href="#" role="button"><i class="fas fa-edit"></i> </button></td>
+                        </tr>'
+                        ?>
+
+                        </tbody>
+                    </table>
                     This is sensor page
                 </div> <!-- #about -->
                 </div>

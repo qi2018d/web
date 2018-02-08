@@ -16,19 +16,16 @@ class RegistrationModel extends Model
 {
     public function getRegistration($user_id){
         // need mac address formatting
-        $sql = 'SELECT name, HEX(mac_addr) AS bd_addr
+        $sql = 'SELECT reg_id, name, HEX(bd_addr) AS bd_addr
                 FROM registration
                 WHERE user_id = ?';
         $stmt = $this->getReadConnection()->prepare($sql);
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
         $stmt->execute(array($user_id));
+
         if($stmt->rowCount() >= 0){
             $reg_records = $stmt->fetchAll();
-            $result = [];
-            foreach($reg_records as $r){
-                $r['bd_addr'] = mac_address_formatter($r['bd_addr']);
-            }
-            return $result;
+            return $reg_records;
         }
         else {
             return false;
@@ -36,28 +33,28 @@ class RegistrationModel extends Model
     }
 
     public function saveRegistration($user_id, $req){
-        $mac_addr = mac_address_str2hex($req['bd_addr']);
-        if(strlen($mac_addr) != 12){
-            throw new \Exception('mac_addr is invalid. ', 201);
+        $bd_addr = mac_address_str2hex($req['bd_addr']);
+        if(strlen($bd_addr) != 12){
+            throw new \Exception('bd_addr is invalid. ', 201);
         }
 
         $name = $req['name'];
         $sql = 'SELECT reg_id
                 FROM registration
-                WHERE user_id = ? AND CONV(mac_addr, 10, 16) = ?';
+                WHERE user_id = ? AND CONV(bd_addr, 10, 16) = ?';
         $stmt = $this->getReadConnection()->prepare($sql);
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
-        $stmt->execute(array($user_id, $mac_addr));
+        $stmt->execute(array($user_id, $bd_addr));
         if($stmt->rowCount() > 0){
             // already exist
-            throw new \Exception('mac_addr is already exist. ', 202);
+            throw new \Exception('bd_addr is already exist. ', 202);
         }
         else {
-            $sql = 'INSERT INTO registration (user_id, mac_addr, name)
-                    VALUE (:user_id, CONV(:mac_addr, 16, 10), :name)';
+            $sql = 'INSERT INTO registration (user_id, bd_addr, name)
+                    VALUE (:user_id, CONV(:bd_addr, 16, 10), :name)';
             $stmt = $this->getReadConnection()->prepare($sql);
             $stmt->bindParam('user_id', $user_id, FILTER_SANITIZE_NUMBER_INT);
-            $stmt->bindParam('mac_addr', $mac_addr, FILTER_SANITIZE_STRING);
+            $stmt->bindParam('bd_addr', $bd_addr, FILTER_SANITIZE_STRING);
             $stmt->bindParam('name', $name, FILTER_SANITIZE_STRING);
             $status = $stmt->execute();
             if ($status){
@@ -70,17 +67,17 @@ class RegistrationModel extends Model
     }
 
     public function deleteRegistration($user_id, $req){
-        $mac_addr = str_replace(':', '', $req['bd_addr']);
-        if(strlen($mac_addr) != 12){
-            throw new \Exception('mac_addr is invalid. ', 201);
+        $bd_addr = str_replace(':', '', $req['bd_addr']);
+        if(strlen($bd_addr) != 12){
+            throw new \Exception('bd_addr is invalid. ', 201);
         }
 
         $sql = 'SELECT reg_id
                 FROM registration
-                WHERE user_id = ? AND CONV(mac_addr, 10, 16) = ?';
+                WHERE user_id = ? AND CONV(bd_addr, 10, 16) = ?';
         $stmt = $this->getReadConnection()->prepare($sql);
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
-        $stmt->execute(array($user_id, $mac_addr));
+        $stmt->execute(array($user_id, $bd_addr));
 
         if($stmt->rowCount() == 0){
             // already exist

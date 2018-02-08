@@ -11,8 +11,6 @@ $app->group('/user', function() use ($app) {
     $app->get('/changepw', 'Iot\Controller\PageController:actionUserChangePassword')->name('get-user-changepw-page');
 });
 
-$app->get('/sensor', 'Iot\Controller\PageController:actionSensor')->name('get-sensor-page');
-
 $app->get('/signin', 'Iot\Controller\PageController:actionSignin')->name('get-signin-page');
 
 $app->group('/signup', function() use ($app){
@@ -26,5 +24,7 @@ $app->get('/forgotpw', 'Iot\Controller\PageController:actionForgotpw')->name('ge
 $app->get('/forgotpw/validation', 'Iot\Controller\PageController:actionForgotpwValidation')->name('get-forgotpw-validation-page');
 $app->get('/forgotpw/change', 'Iot\Controller\PageController:actionForgotpwChange')->name('get-forgotpw-change-page');
 
+$app->get('/charts', 'Iot\Controller\PageController:actionCharts')->name('get-charts-page');
+$app->get('/sensor', 'Iot\Controller\PageController:actionSensor')->name('get-sensor-page');
 
 $app->get('/developers', 'Iot\Controller\PageController:actionDevelopers')->name('get-developers-page');

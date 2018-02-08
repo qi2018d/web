@@ -60,5 +60,11 @@ $app->group('/api', function () use ($app) {
         //  Show air quality data for google maps.
         $app->post('/read/maps', 'Iot\Controller\REST\DataController:actionPostReadMaps')
             ->name('post-read-data-maps');
+
+        $app->post('/read/maps/geojson', 'Iot\Controller\REST\DataController:actionPostReadMapsGeojson')
+            ->name('post-read-data-maps-geojson');
+
+        $app->get('/read/charts', 'Iot\Controller\REST\DataController:actionPostReadCharts')
+            ->name('post-read-data-history');
     });
 });

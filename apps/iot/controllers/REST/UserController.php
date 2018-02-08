@@ -75,32 +75,31 @@ class UserController extends Controller
 
         $verification = $user->getSignupVerificationCode();
 
-        // check code validation
+        // check code and time validation
         if ($verification['code'] == trim($input_code)
             && strtotime($verification['valid_date']) > $_SERVER['REQUEST_TIME']) {
-
+            //
             // delete validation record, update user status
             $user->deleteSignupVerificationCode();
+
             unset($_SESSION['signup_ver_id']);
 
             $user->updateUserStatusAuth($verification['user_id']);
 
             $_SESSION['user_id'] = $verification['user_id'];
 
-            $res = array(
+            $response = array(
                 'status' => true,
-                'code' => 100,
-                'message' => 'Success'
+                'code' => 1000
             );
         }
         else {
-            $res = array(
+            $response = array(
                 'status' => false,
-                'code' => 0,
-                'message' => 'Code is invalid. '
+                'code' => 2004
             );
         }
-        echo json_encode($res);
+        echo json_encode($response);
     }
 
     /* sign in & sign out */
@@ -115,51 +114,54 @@ class UserController extends Controller
 
         if (is_array($user)) {
             if (password_verify($password, $user['passwd_hash'])) {
-
-                //$_SESSION['status'] = 'sign-in';
                 $_SESSION['user_id'] = $user['user_id'];
 
-                echo json_encode(array('status' => true, 'message' => 'Success'));
+                echo json_encode(array('status' => true, 'code'=> 1000));
                 return;
+            } else {
+                echo json_encode(array('status' => false, 'code' => 2102));
             }
+        } else {
+            echo json_encode(array('status' => false, 'code' => 2101));
         }
-
-        echo json_encode(array('status' => false, 'message' => 'User name or Password is incorrect'));
     }
     public function actionPostUserSignout(){
         unset($_SESSION['user_id']);
-        //$this->getApp()->redirect('/');
+        session_destroy();
     }
 
     /* additional user menu */
     public function actionPostUserExist(){
         //check that user exists
         $this->getApp()->contentType('application/json');
-        $req = json_decode($this->getApp()->request->getBody());
+        $request = json_decode($this->getApp()->request->getBody());
+
         $user = new UserModel();
-        $result = $user->getUserByID($req);
-        if (is_array($result)){
-            if(count($result) > 0){
+
+        $user_record = $user->getUserByID($request);
+
+        if (is_array($user_record)){
+            if(count($user_record) > 0){
+                // user exist
                 $data = array(
                     'status' => true,
-                    'code'=> 100,
-                    'message'=> 'Success'
+                    'code'=> 1000
                 );
             }
             else {
+                // user not exist
                 $data = array(
                     'status' => false,
-                    'code'=> 112,
-                    'message'=> 'Not Exist'
+                    'code'=> 112
                 );
             }
 
         }
         else {
+            //  PDO ERROR
             $data = array(
                 'status' => false,
-                'code'=> 113,
-                'message'=> 'Request form error'
+                'code'=> 113
             );
         }
         echo json_encode($data);
@@ -168,37 +170,32 @@ class UserController extends Controller
         // change user password
         $this->getApp()->contentType('application/json');
 
-
         $json = json_decode($this->getApp()->request->getBody());
         $current_pw = $json->current_pw;
         $new_pw = $json->new_pw;
 
-        $result = (new UserModel())->changePassword($current_pw, $new_pw);
+        $isSuccess = (new UserModel())->changePassword($current_pw, $new_pw);
 
-        if ($result){
+        if ($isSuccess){
             $data = array(
                 "status" => true,
-                "code" => 100,
-                "message" => "Success"
+                "code" => 1000
             );
-            echo json_encode($data);
-
         }
         else {
             $data = array(
                 'status' => false,
-                'code' => 121,
-                'message' => 'Current password is not correct'
+                'code' => 121
             );
-            echo json_encode($data);
         }
-
+        echo json_encode($data);
     }
     public function actionGetUserCancelID(){
         // change user password
         $this->getApp()->contentType('application/json');
         (new UserModel())->cancelID();
         unset($_SESSION['user_id']);
+        session_destroy();
     }
 
 
@@ -212,44 +209,40 @@ class UserController extends Controller
         $this->getApp()->contentType('application/json');
 
         $email = json_decode($this->getApp()->request->getBody())->email;
-        $record = $user->getUserByID($email);
-        $user_id = $record['user_id'];
-
+        $user_record = $user->getUserByID($email);
+        $user_id = $user_record['user_id'];
 
         $user->makeForgotpwVerificationCode($user_id, $_SERVER['REQUEST_TIME']);
-        $verification = $user->getForgotpwVerificationCode();
+        $verification_record = $user->getForgotpwVerificationCode();
 
         //echo $_SESSION['forgotpw_ver_id'];
 
-        if(!is_bool($verification)){
+        if(!is_bool($verification_record)){
+            //
             try {
-                $this->actionSendVerificationCode($verification);
+                $this->actionSendVerificationCode($verification_record);
 
-                $res = array(
+                $response = array(
                     'status' => true,
-                    'code' => 100,
-                    'message' => 'Success'
+                    'code' => 1000
                 );
-                echo json_encode($res);
             }
             catch (\Exception $e){
-                $res = array(
+                $response = array(
                     'status' => false,
                     'code' => 103,
-                    'message' => 'Something wrong to send a mail. ' . $e->getMessage()
+                    'message' => $e->getMessage()
                 );
-                echo json_encode($res);
             }
+
         }
         else {
-            $res = array(
+            $response = array(
                 'status' => false,
-                'code' => 104,
-                'message' => 'ver_code is not generated.'
+                'code' => 104
             );
-            echo json_encode($res);
         }
-
+        echo json_encode($response);
     }
     public function actionPostUserForgotpwVerifyCode(){
 
@@ -258,31 +251,29 @@ class UserController extends Controller
 
         $user = new UserModel();
 
-        $verification = $user->getForgotpwVerificationCode();
+        $verification_record = $user->getForgotpwVerificationCode();
 
         // check code validation
-        if ($verification['code'] == trim($input_code)
-            && strtotime($verification['valid_date']) > $_SERVER['REQUEST_TIME']) {
+        if ($verification_record['code'] == trim($input_code)
+            && strtotime($verification_record['valid_date']) > $_SERVER['REQUEST_TIME']) {
 
-            $_SESSION['user_id'] = $verification['user_id'];
+            $_SESSION['user_id'] = $verification_record['user_id'];
 
             // delete validation record, update user status
             $user->deleteForgotpwVerificationCode();
 
-            $res = array(
+            $response = array(
                 'status' => true,
-                'code' => 100,
-                'message' => 'Success'
+                'code' => 1000
             );
         }
         else {
-            $res = array(
+            $response = array(
                 'status' => false,
-                'code' => 0,
-                'message' => 'Code is invalid. '
+                'code' => 2302
             );
         }
-        echo json_encode($res);
+        echo json_encode($response);
     }
     public function actionPostUserForgotpwChange(){
         // change user password
@@ -291,41 +282,38 @@ class UserController extends Controller
         $json = json_decode($this->getApp()->request->getBody());
         $new_pw = $json->new_pw;
 
-        $result = (new UserModel())->changeForgotPassword($new_pw);
+        $isSuccess = (new UserModel())->changeForgotPassword($new_pw);
         unset($_SESSION['forgotpw_ver_id']);
         unset($_SESSION['user_id']);
 
-        if ($result){
-            $data = array(
+        if ($isSuccess){
+            $response = array(
                 "status" => true,
-                "code" => 100,
-                "message" => "Success"
+                "code" => 1000
             );
-            echo json_encode($data);
+
 
         }
         else {
             $data = array(
                 'status' => false,
-                'code' => 121,
-                'message' => 'Current password is not correct'
+                'code' => 121
             );
-            echo json_encode($data);
         }
-
+        echo json_encode($response);
     }
 
     /* user data */
     public function actionGetCurrentUserInfo(){
 
         $user_info = (new UserModel())->getCurrentUser();
-        $res = array(
+        $response = array(
             'status' => true,
             'user_id' => $user_info['user_id'],
             'email' => $user_info['email'],
             'username' => $user_info['username']
         );
-        echo json_encode($res);
+        echo json_encode($response);
     }
     public function actionGetUserInfo(){
         //TODO
@@ -372,7 +360,7 @@ class UserController extends Controller
         if (is_array($record)){
             $data = array(
                 'status' => true,
-                'code' => 100,
+                'code' => 1000,
                 'message' => array()
             );
             foreach($record as $r){
@@ -382,8 +370,7 @@ class UserController extends Controller
         else {
             $data = array(
                 'status' => false,
-                'code' => 131,
-                'message' => 'Request form is invalid. ',
+                'code' => 131
             );
         }
         echo json_encode($data);
@@ -398,8 +385,7 @@ class UserController extends Controller
                 $reg->saveRegistration($user_id, $req);
                 $data = array(
                     'status' => true,
-                    'code' =>100,
-                    'message' => 'Success'
+                    'code' =>1000
                 );
             }
             catch(\Exception $e){
@@ -413,8 +399,7 @@ class UserController extends Controller
         else {
             $data = array(
                 'status' => false,
-                'code' => 132,
-                'message' => 'Lack of required attributes. '
+                'code' => 132
             );
         }
         echo json_encode($data);
@@ -430,8 +415,7 @@ class UserController extends Controller
                 $reg->deleteRegistration($user_id, $req);
                 $data = array(
                     'status' => true,
-                    'code' => 100,
-                    'message' => 'Success'
+                    'code' => 1000
                 );
             }
             catch(\Exception $e){
@@ -445,8 +429,7 @@ class UserController extends Controller
         else {
             $data = array(
                 'status' => false,
-                'code' => 0,
-                'message' => 'Submitted form is invalid. '
+                'code' => 203
             );
         }
 

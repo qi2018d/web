@@ -2,6 +2,7 @@
 namespace Iot\Controller;
 
 
+use Iot\Model\RegistrationModel;
 use Slimvc\Core\Controller;
 
 class PageController extends Controller
@@ -146,12 +147,17 @@ class PageController extends Controller
         $this->render("map.phtml", $data);
     }
     public function actionSensor(){
-
         if($this->isSignedIn()) {
             $this->getApp()->contentType('text/html');
+            $user_id = $_SESSION['user_id'];
+            $registrationModel = new RegistrationModel();
+            $records = $registrationModel->getRegistration($user_id);
+
             $data = array(
                 "title" => $this->title,
-                "team_name" => $this->team_name);
+                "team_name" => $this->team_name,
+                "registration" => $records);
+
             $this->render("sensor.phtml", $data);
         }
         else
