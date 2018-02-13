@@ -5,34 +5,89 @@
         <div class="fluid-container">
             <div class="content-wrapper">
                 <div class="page-section" id="about">
-                <div class="row">
-                    <table class="table table-hover">
-                        <thead>
-                        <tr>
-                            <th scope="col" class="col-xs-2">Sensor ID</th>
-                            <th scope="col" class="col-xs-6">Name</th>
-                            <th scope="col" class="col-xs-3">Mac Address</th>
-                            <th scope="col" class="col-xs-1">Edit</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php
-                        foreach($registration as $record)
-                            echo '<tr class="table-active">
-                            <th scope="row"><p>' . $record['reg_id'] . '</p></th>
-                            <td><p>' . $record['name'] . '</p></td>
-                            <td><p>' . $record['bd_addr'] . '</p></td>
-                            <td> <a class="btn btn-default" href="#" role="button"><i class="fas fa-edit"></i> </button></td>
-                        </tr>'
-                        ?>
+                    <div class="row">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th scope="col" class="col-xs-2">Sensor ID</th>
+                                <th scope="col" class="col-xs-5">Name</th>
+                                <th scope="col" class="col-xs-3">Mac Address</th>
+                                <th scope="col" class="col-xs-1">Edit</th>
+                                <th scope="col" class="col-xs-1">Delete</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+                            foreach($registration as $record)
+                                echo '<tr id="reg_' . $record['reg_id'] .'" class="table-active">
+                                <th scope="row"><p>' . $record['reg_id'] . '</p></th>
+                                <td><p>' . $record['name'] . '</p></td>
+                                <td><p>' . $record['bd_addr'] . '</p></td>
+                                <td> <button class="btn btn-default btn-edit" role="button"><i class="fas fa-edit"></i> </button></td>
+                                <td> <button class="btn btn-default btn-delete" role="button"><i class="far fa-trash-alt"></i> </button></td>
+                            </tr>'
+                            ?>
 
-                        </tbody>
-                    </table>
-                    This is sensor page
-                </div> <!-- #about -->
+                            </tbody>
+                        </table>
+                    </div> <!-- #about -->
                 </div>
                 <?php require 'common/footer.php' ?>
             </div>
         </div>
     </div>
+<script>
+    $(document).ready(function(){
+        $('.btn-delete').click(function(){
+            var $tableRow = $(this).parents('tr');
+            var response = { "bd_addr": $tableRow.children('td').eq(1).text() };
+
+            $.ajax({
+                type:"POST",
+                dataType: "json",
+                url: <?php echo "\"http://teamd-iot.calit2.net/api/user/" . $_SESSION['user_id'] . "/deregister/sensor\""?>,
+                data: JSON.stringify(response),
+                contentType: "application/json",
+                success: function(results) {
+                    if(results.code == 1000){
+                        location.reload();
+                    }
+                    else {
+                        alert("Failed to update: " + results.code);
+                    }
+                }
+            });
+        });
+
+        $('.btn-edit').click(function(){
+            var $tableRow = $(this).parents('tr');
+            var name = $tableRow.children('td').eq(0).text();
+
+            $tableRow.children('td').eq(0).empty().append('<input type="text" value="' + name + '"/>');
+            $tableRow.children('td').eq(2).empty().append('<button class="btn btn-default btn-check" role="button"><i class="fas fa-check"></i> </button>');
+
+            $('.btn-check').click(function(){
+                var $tableRow = $(this).parents('tr');
+                var response = { "name": $tableRow.children('td').children('input').first().val() };
+
+                $.ajax({
+                    type:"POST",
+                    dataType: "json",
+                    url: <?php echo "\"http://teamd-iot.calit2.net/api/user/" . $_SESSION['user_id'] . "/update/sensor/\""?> + $tableRow.attr('id').slice(4),
+                    data: JSON.stringify(response),
+                    contentType: "application/json",
+                    success: function(results) {
+                        if(results.code == 1000){
+                            location.reload();
+                        }
+                        else {
+                            alert("Failed to update: " + results.code);
+                        }
+                    }
+                });
+            });
+        });
+
+    });
+</script>
 <?php require 'common/end.php' ?>

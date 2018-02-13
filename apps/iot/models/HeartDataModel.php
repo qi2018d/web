@@ -32,6 +32,25 @@ class HeartDataModel extends Model
         }
     }
 
+    public function getUserHeartData($user_id){
+
+        $sql = 'SELECT heartbeat, timestamp
+                FROM heart_data JOIN registration 
+                WHERE user_id = ?
+                ORDER BY timestamp DESC';
+
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        // fetch records that saves 10 seconds before.
+        $isSuccess = $stmt->execute(array($user_id));
+        if ($isSuccess){
+            return $stmt->fetchAll();
+        }
+        else {
+            throw new \Exception("submit form is invalid", 203);
+        }
+    }
+
     public function saveHeartData($req){
         include '../../public/iot/functions.php';
         // assign request data to variables.

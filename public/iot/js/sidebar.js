@@ -1,4 +1,3 @@
-
 if(window.location.pathname === '/'){
     $("#home-menu").addClass("active");
 }

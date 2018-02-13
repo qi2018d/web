@@ -10,38 +10,29 @@
                     <div id="air-map"></div>
                     <script>
                         var map;
-                        var mapClusterData;
-                        // var mapRawData;
-                        // var markers = [];
-                        // var locations = [];
-                        /*function clearOverlays() {
-                            for (var i = 0; i < markers.length; i++ ) {
-                                markers[i].setMap(null);
-                            }
-                            markers.length = 0;
-                        }*/
-
-                        function clearFeatures(){
-                            map.data.forEach(function(feature){
-                                map.data.remove(feature);
-                            });
-                        }
 
                         function initMap() {
                             map = new google.maps.Map(document.getElementById('air-map'), {
-                                center: {lat:32.8787614, lng:-117.2349534},
-                                zoom: 12
+                                center: { lat:32.8787614, lng:-117.2349534 },
+                                zoom: 12,
+                                styles:[
+                                    {"featureType": "landscape", "stylers": [{"hue": "#FFBB00"}, {"saturation": 43.400000000000006}, { "lightness": 37.599999999999994}, {"gamma": 1}]},
+                                    {"featureType": "road.highway", "stylers": [{"hue": "#FFC200"}, {"saturation": -61.8}, {"lightness": 45.599999999999994}, {"gamma": 1}]},
+                                    {"featureType": "road.arterial", "stylers": [{"hue": "#FF0300"}, {"saturation": -100}, {"lightness": 51.19999999999999}, {"gamma": 1}]},
+                                    {"featureType": "road.local", "stylers": [{"hue": "#FF0300"}, {"saturation": -100}, {"lightness": 52}, {"gamma": 1}]},
+                                    {"featureType": "water", "stylers": [{"hue": "#0078FF"}, {"saturation": -13.200000000000003}, {"lightness": 2.4000000000000057}, {"gamma": 1}]},
+                                    {"featureType": "poi", "stylers": [{"hue": "#00FF6A"}, {"saturation": -1.0989010989011234}, {"lightness": 11.200000000000017}, {"gamma": 1}]}
+                                ]
                             });
 
-
+                            var zoom = map.getZoom();
                             map.data.setStyle(function(feature) {
-                                var concentration = feature.getProperty('co');
+                                var concentration = feature.getProperty('radius');
                                 return {
-                                    title: feature.getProperty('co'),
-                                    icon: getCircle(concentration)
+                                    title: feature.getProperty('radius'),
+                                    icon: getCircle(zoom, concentration)
                                 };
                             });
-
 
                             google.maps.event.addListener(map, "dragend", function(){
                                 clearFeatures();
@@ -55,86 +46,10 @@
                                 clearFeatures();
                                 getAirData(map.getBounds());
                             });
-
-
-                        }
-
-                        function getCircle(concentration) {
-                            return {
-                                path: google.maps.SymbolPath.CIRCLE,
-                                fillColor: 'red',
-                                fillOpacity: .2,
-                                scale: Math.pow(2, concentration * 7) / 2,
-                                strokeColor: 'white',
-                                strokeWeight: .5
-                            };
-                        }
-                        /*function getBlueCircle(concentration) {
-                            return {
-                                path: google.maps.SymbolPath.CIRCLE,
-                                fillColor: 'blue',
-                                fillOpacity: .2,
-                                scale: Math.pow(2, concentration * 5) / 2,
-                                strokeColor: 'white',
-                                strokeWeight: .5
-                            };
-                        }*/
-
-                        function getAirData(res){
-                            $.ajax({
-                                type:"POST",
-                                dataType: "json",
-                                url: "http://teamd-iot.calit2.net/api/data/read/maps/geojson",
-                                data: JSON.stringify(res),
-                                contentType: "application/json",
-                                success: function(results) {
-                                    if(typeof mapClusterData != 'undefined')
-                                        mapClusterData.setMap(null);
-
-                                    var features = results.message.features;
-                                    var coordinates = [];
-
-                                    features.forEach(feature => {
-                                        coordinates.push(feature.geometry.coordinates);
-                                    });
-
-                                    clusterMaker.iterations(2500);
-                                    clusterMaker.data(coordinates);
-
-
-                                    var centroids = [];
-                                    clusterMaker.clusters().forEach(result => {
-                                        centroids.push(result.centroid);
-                                    });
-
-                                    var reduced = getReducedFeatures(features, centroids);
-                                    mapClusterData = new google.maps.Data();
-                                    mapClusterData.addGeoJson(reduced);
-                                    mapClusterData.setStyle(function(feature) {
-                                        var concentration = feature.getProperty('co');
-                                        return {
-                                            title: feature.getProperty('co'),
-                                            icon: getCircle(concentration)
-                                        };
-                                    });
-
-                                    /*mapRawData = new google.maps.Data();
-                                    mapRawData.addGeoJson(results.message);
-                                    mapRawData.setStyle(function(feature) {
-                                        var concentration = feature.getProperty('co');
-                                        return {
-                                            title: feature.getProperty('co'),
-                                            icon: getBlueCircle(concentration)
-                                        };
-                                    });
-*/
-                                    mapClusterData.setMap(map);
-                                    // mapRawData.setMap(map);
-                                }
-                            });
                         }
                     </script>
                     <script src="js/kmeans.js"></script>
+                    <script src="js/maps.js"></script>
                     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC94R7siOtY7X9L0P-9pTzQiCn7V2hbCaI&callback=initMap" async defer></script>
                 </div>
                 <?php require 'common/footer.php' ?>

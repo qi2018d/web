@@ -11,6 +11,12 @@ function isUserName(username){
     return regex.test(username);
 }
 
+function isValidEmailFormat(email){
+    if(!isEmail(email)){
+        return {status: false, message: "Invalid email format"}
+    }
+    return {status: true};
+}
 function isValidSignInFormat(username, password){
     //username can be email address or username itself
 
@@ -53,7 +59,6 @@ function isValidChangepwFormat(current_pw, new_pw, confirm)
 
     return {status: true};
 }
-
 
 function isValidForgotpwChangeFormat(new_pw, confirm)
 {

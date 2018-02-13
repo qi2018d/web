@@ -590,8 +590,8 @@ h3.profile-title {
 }
 
 #air-map{
-    height: 550px;
-    width: 100%;
+    height: 80vh;
+    width: 70vw;
 }
 
 .user-auth-form input{
@@ -612,5 +612,24 @@ h3.profile-title {
 
 .navigation li a{
   font-size: 19px;
+}
+
+.progress-bar-good{
+  background-color: #38EA34;
+}
+.progress-bar-moderate{
+  background-color: #FFFA4D;
+}
+.progress-bar-unhealthy-s{
+  background-color: #FFAC56;
+}
+.progress-bar-unhealthy{
+  background-color: #FF5A41;
+}
+.progress-bar-unhealthy-v{
+  background-color: #991C59;
+}
+.progress-bar-hazardous{
+  background-color: #63171D;
 }
 

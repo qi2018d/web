@@ -16,7 +16,7 @@ class RegistrationModel extends Model
 {
     public function getRegistration($user_id){
         // need mac address formatting
-        $sql = 'SELECT reg_id, name, HEX(bd_addr) AS bd_addr
+        $sql = 'SELECT reg_id, name, LPAD(HEX(bd_addr), 12, "0") AS bd_addr
                 FROM registration
                 WHERE user_id = ?';
         $stmt = $this->getReadConnection()->prepare($sql);
@@ -33,12 +33,12 @@ class RegistrationModel extends Model
     }
 
     public function saveRegistration($user_id, $req){
-        $bd_addr = mac_address_str2hex($req['bd_addr']);
+        $bd_addr = mac_address_str2hex($req->{'bd_addr'});
         if(strlen($bd_addr) != 12){
             throw new \Exception('bd_addr is invalid. ', 201);
         }
 
-        $name = $req['name'];
+        $name = $req->{'name'};
         $sql = 'SELECT reg_id
                 FROM registration
                 WHERE user_id = ? AND CONV(bd_addr, 10, 16) = ?';
@@ -67,14 +67,15 @@ class RegistrationModel extends Model
     }
 
     public function deleteRegistration($user_id, $req){
-        $bd_addr = str_replace(':', '', $req['bd_addr']);
+        $bd_addr = str_replace(':', '', $req->{'bd_addr'});
+
         if(strlen($bd_addr) != 12){
             throw new \Exception('bd_addr is invalid. ', 201);
         }
 
         $sql = 'SELECT reg_id
                 FROM registration
-                WHERE user_id = ? AND CONV(bd_addr, 10, 16) = ?';
+                WHERE user_id = ? AND LPAD(HEX(bd_addr), 12, "0") = ?';
         $stmt = $this->getReadConnection()->prepare($sql);
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
         $stmt->execute(array($user_id, $bd_addr));
@@ -98,4 +99,15 @@ class RegistrationModel extends Model
             }
         }
     }
+
+    public function updateRegistrationName($reg_id, $name){
+        $sql = 'UPDATE registration
+                SET name = ?
+                WHERE reg_id = ?';
+
+        $stmt = $this->getReadConnection()->prepare($sql);
+        return $stmt->execute(array($name, $reg_id));
+    }
+
+
 }

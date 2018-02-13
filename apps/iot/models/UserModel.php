@@ -65,16 +65,20 @@ class UserModel extends Model
             $this->getReadConnection()->rollBack();
             throw new \Exception($stmt->errorInfo(), $stmt->errorCode());
         }
-        // insert a verification code record
-        $this->makeSignupVerificationCode($this->getReadConnection()->lastInsertId(), $reg_timestamp);
 
         $this->getReadConnection()->commit();
         // =============================================================================
         return $user_id;
     }
-    private function makeSignupVerificationCode($user_id, $reg_timestamp){
+
+    // make signup verification code
+    // return signup verification id
+    public function makeSignupVerificationCode($user_id, $reg_timestamp){
+
+        // generate 5 random characters
         srand($_SERVER['REQUEST_TIME']);
         $code = chr(rand(65,90)) . chr(rand(65,90)) . chr(rand(65,90)) . chr(rand(65,90)) . chr(rand(65,90));
+
         $valid_timestamp = $reg_timestamp + 3600;
         $valid_datetime = date('Y-m-d H:i:s', $valid_timestamp);
 
@@ -92,8 +96,10 @@ class UserModel extends Model
             $this->getReadConnection()->rollBack();
             throw new \Exception($stmt->errorInfo(), $stmt->errorCode());
         }
-        $_SESSION['signup_ver_id'] = $this->getReadConnection()->lastInsertId();
+
+        return $this->getReadConnection()->lastInsertId();
     }
+
     public function getSignupVerificationCode(){
 
         $sql = 'SELECT ver_id, user_id, email, username, code, valid_date
@@ -110,6 +116,7 @@ class UserModel extends Model
             return $stmt->fetch();
         }
     }
+
     public function deleteSignupVerificationCode(){
         $sql = 'DELETE FROM ver_code            
                 WHERE ver_id = ?';
@@ -123,6 +130,9 @@ class UserModel extends Model
             return true;
         }
     }
+
+
+
     public function updateUserStatusAuth($user_id){
         $sql = 'UPDATE user
                 SET status_auth = 1
@@ -155,7 +165,7 @@ class UserModel extends Model
         $stmt->bindParam(':valid_date', $valid_datetime, FILTER_SANITIZE_STRING);
         $stmt->execute();
 
-        $_SESSION['forgotpw_ver_id'] = $this->getReadConnection()->lastInsertId();
+        return $this->getReadConnection()->lastInsertId();
     }
 
     public function getForgotpwVerificationCode(){
@@ -167,6 +177,7 @@ class UserModel extends Model
         $stmt = $this->getReadConnection()->prepare($sql);
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
         $stmt->execute(array($_SESSION['forgotpw_ver_id']));
+
         if ($stmt->rowCount() == 0){
             return false;
         }
@@ -174,11 +185,27 @@ class UserModel extends Model
             return $stmt->fetch();
         }
     }
-    public function deleteForgotpwVerificationCode(){
+
+    public function isVerificationExist($userId){
+        $sql = 'SELECT ver_id, user_id, email, username, code, valid_date
+                FROM ver_code NATURAL JOIN user 
+                WHERE user_id = ?';
+
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        $stmt->execute(array($userId));
+        if ($stmt->rowCount() == 0){
+            return false;
+        }
+        else {
+            return $stmt->fetch();
+        }
+    }
+    public function deleteForgotpwVerificationCode($verificationId){
         $sql = 'DELETE FROM ver_code            
                 WHERE ver_id = ?';
         $stmt = $this->getReadConnection()->prepare($sql);
-        $stmt->execute(array($_SESSION['forgotpw_ver_id']));
+        $stmt->execute(array($verificationId));
         if ($stmt->rowCount() == 0){
             return false;
         }
@@ -186,9 +213,7 @@ class UserModel extends Model
             return true;
         }
     }
-    public function changeForgotPassword($new_pw){
-
-        $user_id = $_SESSION['user_id'];
+    public function changeForgotPassword($userId, $new_pw){
 
         $sql = "UPDATE user 
                 SET passwd_hash = ?
@@ -196,7 +221,7 @@ class UserModel extends Model
 
         $stmt = $this->getReadConnection()->prepare($sql);
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
-        return $stmt->execute(array(password_hash($new_pw, PASSWORD_DEFAULT), $user_id));
+        return $stmt->execute(array(password_hash($new_pw, PASSWORD_DEFAULT), $userId));
     }
 
     /* change pw */
@@ -263,6 +288,124 @@ class UserModel extends Model
         $stmt = $this->getReadConnection()->prepare($sql);
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
         $stmt->execute(array(strval($identifier), strval($identifier)));
+
+        return $stmt->fetch();
+    }
+
+
+
+
+
+
+
+    public function getAppSignupVerificationCode($verificationId){
+
+        $sql = 'SELECT ver_id, user_id, email, username, code, valid_date
+                FROM ver_code NATURAL JOIN user 
+                WHERE ver_id = ?';
+
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        $stmt->execute(array($verificationId));
+        if ($stmt->rowCount() == 0){
+            return false;
+        }
+        else {
+            return $stmt->fetch();
+        }
+    }
+
+    public function appCancelID($userId){
+
+        $sql = "DELETE 
+                from user
+                WHERE user_id = ?";
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        $stmt->execute($userId);
+    }
+
+    public function deleteAppSignupVerificationCode($verificationId){
+        $sql = 'DELETE FROM ver_code            
+                WHERE ver_id = ?';
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->execute(array($verificationId));
+
+        if ($stmt->rowCount() == 0){
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    public function getAppForgotpwVerificationCode($verificationId){
+
+        $sql = 'SELECT ver_id, user_id, email, username, code, valid_date
+                FROM ver_code NATURAL JOIN user 
+                WHERE ver_id = ?';
+
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        $stmt->execute(array($verificationId));
+        if ($stmt->rowCount() == 0){
+            return false;
+        }
+        else {
+            return $stmt->fetch();
+        }
+    }
+
+    public function deleteAppForgotpwVerificationCode($verificaionId){
+        $sql = 'DELETE FROM ver_code            
+                WHERE ver_id = ?';
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->execute(array($verificaionId));
+        if ($stmt->rowCount() == 0){
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    public function appChangePassword($userId, $current_pw, $new_pw){
+
+        // check old-password is correct
+        $sql = "SELECT user_id, email, username, passwd_hash
+                FROM user
+                WHERE user_id = ?";
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        $stmt->execute(array($userId));
+        $user = $stmt->fetch();
+
+        if ($stmt->rowCount() > 0){
+            if (password_verify($current_pw, $user['passwd_hash'])){
+                // if correct, update to new-password
+                $sql = "UPDATE user 
+                        SET passwd_hash = ?
+                        WHERE user_id = ?";
+                $stmt = $this->getReadConnection()->prepare($sql);
+                $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+                return $stmt->execute(array(password_hash($new_pw, PASSWORD_DEFAULT), $userId));
+            }
+            else {
+                // if not correct
+                return false;
+            }
+        }
+        return false;
+    }
+
+    // get a user record with email or username
+    public function getAppCurrentUser($userId){
+        $sql = "SELECT user_id, email, username, passwd_hash
+                FROM user
+                WHERE user_id = ?";
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        $stmt->execute(array(strval($userId)));
 
         return $stmt->fetch();
     }

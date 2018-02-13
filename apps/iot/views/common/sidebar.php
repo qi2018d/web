@@ -30,7 +30,7 @@
 <div id="sidebar" class="sidebar-menu hidden-xs hidden-sm">
     <div class="top-section">
         <div class="profile-image">
-            <!--img src="img/profile.jpg" alt="profile image"-->
+            <!--img src="img/cloud-100.png" alt="profile image"-->
         </div>
         <h3 class="profile-title"></h3>
         <p class="profile-description"></p>
@@ -42,12 +42,12 @@
 
             <?php if(isset($_SESSION["user_id"])) :?>
                 <li class="sidebar-li"><a href="/user" id="user-menu"><i class="fas fa-user"></i>User</a></li>
-                <li class="sidebar-li"><a href="/sensor" id="sensor-menu"><i class="fab fa-bluetooth-b"></i>Sensor</a></li>
+                <li class="sidebar-li"><a href="/sensor" id="sensor-menu"><i class="fab fa-bluetooth-b"></i>&nbsp;&nbsp;Sensor</a></li>
                 <li class="sidebar-li"><a href="/charts" id="sensor-menu"><i class="fas fa-chart-line"></i>Charts</a></li>
-                <li class="sidebar-li"><a href="/" id="signout-menu"><i class="fas fa-sign-out-alt"></i>Sign out</a></li>
+                <li class="sidebar-li"><a style="cursor: pointer;" id="signout-menu"><i class="fas fa-sign-out-alt"></i>Sign out</a></li>
             <?php else: ?>
                 <li class="sidebar-li"><a href="/signin" id="signin-menu"><i class="fas fa-sign-in-alt"></i>Sign in</a></li>
-            <?php endif; ?>
+            <?php endif ?>
             <li class="sidebar-li"><a href="/developers" id="developer-menu"><i class="fas fa-link"></i>Contact us</a></li>
         </ul>
     </div> <!-- .main-navigation -->
@@ -56,13 +56,13 @@
 
             $.ajax({
                 type: "GET",
+                dataType: "json",
                 url: "/api/user/signout",
                 contentType: "application/json",
                 success: function(result){
-
                     // if sign-in success
                     if(result.status === true){
-                        window.location = '/';
+                        window.location.href = '/';
                     }
                 }
             });

@@ -116,10 +116,12 @@ class PageController extends Controller
     public function actionUser(){
 
         if($this->isSignedIn()) {
+
             $this->getApp()->contentType('text/html');
             $data = array(
                 "title" => $this->title,
                 "team_name" => $this->team_name);
+
             $this->render("user.phtml", $data);
         }
         else
@@ -128,10 +130,12 @@ class PageController extends Controller
     public function actionUserChangePassword(){
 
         if($this->isSignedIn()) {
+
             $this->getApp()->contentType('text/html');
             $data = array(
                 "title" => $this->title,
                 "team_name" => $this->team_name);
+
             $this->render("changepw.phtml", $data);
         }
         else
@@ -144,12 +148,16 @@ class PageController extends Controller
         $data = array(
             "title" => $this->title,
             "team_name" => $this->team_name);
+
         $this->render("map.phtml", $data);
     }
     public function actionSensor(){
+
         if($this->isSignedIn()) {
             $this->getApp()->contentType('text/html');
+
             $user_id = $_SESSION['user_id'];
+
             $registrationModel = new RegistrationModel();
             $records = $registrationModel->getRegistration($user_id);
 
@@ -165,10 +173,17 @@ class PageController extends Controller
     }
 
     public function actionCharts(){
-        $data = array(
-            "title" => $this->title,
-            "team_name" => $this->team_name);
-        $this->getApp()->render("charts.phtml", $data);
+        if($this->isSignedIn()) {
+            $data = array(
+                "title" => $this->title,
+                "team_name" => $this->team_name);
+
+            $this->getApp()->render("charts.phtml", $data);
+        }
+        else
+            $this->getApp()->redirect('/signin');
+
+
     }
     public function actionDevelopers()
     {
@@ -176,6 +191,7 @@ class PageController extends Controller
         $data = array(
             "title" => $this->title,
             "team_name" => $this->team_name);
+
         $this->render("developers.phtml", $data);
     }
 
