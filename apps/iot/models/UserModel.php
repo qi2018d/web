@@ -270,13 +270,13 @@ class UserModel extends Model
     }
 
     // get a user record with email or username
-    public function getCurrentUser(){
+    public function getCurrentUser($userId){
         $sql = "SELECT user_id, email, username, passwd_hash
                 FROM user
                 WHERE user_id = ?";
         $stmt = $this->getReadConnection()->prepare($sql);
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
-        $stmt->execute(array(strval($_SESSION['user_id'])));
+        $stmt->execute(array($userId));
 
         return $stmt->fetch();
     }

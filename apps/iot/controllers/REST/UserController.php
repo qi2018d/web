@@ -54,6 +54,7 @@ class UserController extends Controller
             echo json_encode($response);
         }
     }
+
     public function actionPostUserSignupVerifyCode(){
 
         $input_code = json_decode($this->getApp()->request->getBody()) -> {'code'};
@@ -112,6 +113,7 @@ class UserController extends Controller
             echo json_encode(array('status' => false, 'code' => 2101));
         }
     }
+
     public function actionPostUserSignout(){
         unset($_SESSION['user_id']);
         echo json_encode(array('status' => true, 'code'=> 1000));
@@ -153,6 +155,7 @@ class UserController extends Controller
         }
         echo json_encode($data);
     }
+
     public function actionPostUserChangePassword(){
         // change user password
         $this->getApp()->contentType('application/json');
@@ -177,6 +180,7 @@ class UserController extends Controller
         }
         echo json_encode($data);
     }
+
     public function actionGetUserCancelID(){
 
         // change user password
@@ -233,6 +237,7 @@ class UserController extends Controller
 
         echo json_encode($response);
     }
+
     public function actionPostUserForgotpwVerifyCode(){
 
         $this->getApp()->contentType('application/json');
@@ -264,6 +269,7 @@ class UserController extends Controller
         }
         echo json_encode($response);
     }
+
     public function actionPostUserForgotpwChange(){
         // change user password
         $this->getApp()->contentType('application/json');
@@ -292,8 +298,15 @@ class UserController extends Controller
 
     /* user data */
     public function actionGetCurrentUserInfo(){
+        $request = json_decode($this->getApp()->request()->getBody());
 
-        $user_info = (new UserModel())->getCurrentUser();
+        if (isset($_SESSION['user_id'])){
+            $userId = $_SESSION['user_id'];
+        } else {
+            $userId = $request->{'user-id'};
+        }
+
+        $user_info = (new UserModel())->getCurrentUser($userId);
         $response = array(
             'status' => true,
             'user_id' => $user_info['user_id'],
@@ -302,6 +315,7 @@ class UserController extends Controller
         );
         echo json_encode($response);
     }
+
     public function actionGetUserInfo(){
         //TODO
     }
@@ -362,6 +376,7 @@ class UserController extends Controller
         }
         echo json_encode($data);
     }
+
     public function actionPostUserRegisterSensor($user_id){
         // register user's sensor
         $this->getApp()->contentType('application/json');
@@ -391,6 +406,7 @@ class UserController extends Controller
         }
         echo json_encode($data);
     }
+
     public function actionPostUserDeregisterSensor($user_id){
         // deregister the sensor with user_id, json_data
         $this->getApp()->contentType('application/json');
@@ -653,8 +669,6 @@ class UserController extends Controller
         $new_pw = $json->new_pw;
 
         $isSuccess = (new UserModel())->changeForgotPassword($user_id, $new_pw);
-        unset($_SESSION['forgotpw_ver_id']);
-        unset($_SESSION['user_id']);
 
         if ($isSuccess){
             $response = array(
@@ -691,19 +705,5 @@ class UserController extends Controller
         echo json_encode($response);
 
     }
-
-    public function actionAppGetCurrentUserInfo($user_id){
-        $user_info = (new UserModel())->getAppCurrentUser($user_id);
-        $response = array(
-            'status' => true,
-            'code' => 1000,
-            'message' => array('user_id' => $user_info['user_id'],
-                'email' => $user_info['email'],
-                'username' => $user_info['username'])
-        );
-        echo json_encode($response);
-    }
-
-
 
 }

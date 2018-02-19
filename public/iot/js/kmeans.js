@@ -162,7 +162,7 @@ function getMinimumIndex(arr) {
 
 function getReducedFeatures(features, centroids) {
 
-    var scaling_factor = 100.0;
+    var scaling_factor = 14.0;
 
     var numCluster = centroids.length;
 
@@ -175,12 +175,22 @@ function getReducedFeatures(features, centroids) {
     features.forEach(feature => {
         var distancesToCentroid = [];
         centroids.forEach(centroid => {
-            distancesToCentroid.push(dist(centroid, feature.geometry.coordinates));
+
+            var scaler = 100;
+            distancesToCentroid.push(
+                dist(
+
+                    centroid.map(function (x){return x} ),
+                    feature.geometry.coordinates.map(function(x){ return x})
+                )
+            );
         });
 
         cluster = getMinimumIndex(distancesToCentroid);
         clusters[cluster].push(feature);
-        radius[cluster] += distancesToCentroid[cluster];
+
+        // radius[cluster] += distancesToCentroid[cluster];
+        radius[cluster] = Math.max(...distancesToCentroid);
     });
 
     // get average distance to cenroid from each cluster
@@ -201,8 +211,10 @@ function getReducedFeatures(features, centroids) {
             cluster[0]["properties"][key] /= cluster.length;
         });
 
-        cluster[0]["properties"]["radius"] = scaling_factor * radius[index] / cluster.length;
+        // cluster[0]["properties"]["radius"] = scaling_factor * radius[index] / cluster.length;
+        cluster[0]["properties"]["radius"] = scaling_factor * radius[index];
 
+        cluster[0]["properties"]["data_len"] = cluster.length;
         newGeoJson.features.push(cluster[0]);
     });
     return newGeoJson;

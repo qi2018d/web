@@ -30,25 +30,25 @@
 <div id="sidebar" class="sidebar-menu hidden-xs hidden-sm">
     <div class="top-section">
         <div class="profile-image">
-            <!--img src="img/cloud-100.png" alt="profile image"-->
+            <a href="/"><img  src="img/logo.png" alt="profile image"></a>
         </div>
         <h3 class="profile-title"></h3>
         <p class="profile-description"></p>
     </div> <!-- top-section -->
     <div class="main-navigation">
         <ul class="navigation">
-            <li class="sidebar-li"><a href="/" id="home-menu"><i class="fas fa-angle-double-right"></i>Welcome</a></li>
-            <li class="sidebar-li"><a href="/map" id="map-menu"><i class="fas fa-globe"></i>Air Map</a></li>
+            <li class="sidebar-li"><a href="/" id="home-menu"><i class="fas fa-angle-double-right"></i>&nbsp;Welcome</a></li>
+            <li class="sidebar-li"><a href="/map" id="map-menu"><i class="fas fa-globe"></i>&nbsp;Air Map</a></li>
 
             <?php if(isset($_SESSION["user_id"])) :?>
-                <li class="sidebar-li"><a href="/user" id="user-menu"><i class="fas fa-user"></i>User</a></li>
-                <li class="sidebar-li"><a href="/sensor" id="sensor-menu"><i class="fab fa-bluetooth-b"></i>&nbsp;&nbsp;Sensor</a></li>
-                <li class="sidebar-li"><a href="/charts" id="sensor-menu"><i class="fas fa-chart-line"></i>Charts</a></li>
-                <li class="sidebar-li"><a style="cursor: pointer;" id="signout-menu"><i class="fas fa-sign-out-alt"></i>Sign out</a></li>
+                <li class="sidebar-li"><a href="/user" id="user-menu"><i class="fas fa-user"></i>&nbsp;User</a></li>
+                <li class="sidebar-li"><a href="/sensor" id="sensor-menu"><i class="fas fa-wifi"></i>Sensor</a></li>
+                <li class="sidebar-li"><a href="/charts" id="sensor-menu"><i class="fas fa-chart-line"></i>&nbsp;Charts</a></li>
+                <li class="sidebar-li"><a style="cursor: pointer;" id="signout-menu"><i class="fas fa-sign-out-alt"></i>&nbsp;Sign out</a></li>
             <?php else: ?>
-                <li class="sidebar-li"><a href="/signin" id="signin-menu"><i class="fas fa-sign-in-alt"></i>Sign in</a></li>
+                <li class="sidebar-li"><a href="/signin" id="signin-menu"><i class="fas fa-sign-in-alt"></i>&nbsp;Sign in</a></li>
             <?php endif ?>
-            <li class="sidebar-li"><a href="/developers" id="developer-menu"><i class="fas fa-link"></i>Contact us</a></li>
+            <li class="sidebar-li"><a href="/developers" id="developer-menu"><i class="fas fa-link"></i>&nbsp;About us</a></li>
         </ul>
     </div> <!-- .main-navigation -->
     <script>

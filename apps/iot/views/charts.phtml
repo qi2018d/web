@@ -10,12 +10,49 @@
                     <!--Div that will hold the dashboard-->
                     <div id="air_dashboard_div">
                         <!--Divs that will hold each control and chart-->
-                        <div id="air_category_div"></div>
+                        <div class="row vertical-align">
+                            <div class="col-xs-3">
+                                <button type="button" class="btn btn-default" onclick="getOneWeekAirData();">1 week</button>
+                                <button type="button" class="btn btn-default" onclick="getOneDayAirData();">1 day</button>
+                                <button type="button" class="btn btn-default" onclick="getOneHourAirData();">1 hour</button></div>
+                            <div class="col-xs-2">
+                                <b>From: </b><input type="date" id="inputAirRangeFrom" class="form-control" placeholder="From">
+                            </div>
+                            <div class="col-xs-2">
+                                <b>To: </b> <input type="date" id="inputAirRangeTo" class="form-control" placeholder="To">
+                            </div>
+                            <div class="col-xs-1">
+                                <button type="button" class="btn btn-default" onclick="getCustomRangeAirData();"><i class="fas fa-search"></i></button>
+                            </div>
+                            <div class="col-xs-2">
+                                <div id="air_category_div"></div>
+                            </div>
+                        </div>
                         <!--Div that will hold the line chart-->
                         <div id="air_chart_div"></div>
                         <div id="air_range_div"></div>
                     </div>
+                    <hr />
                     <div id="heart_dashboard_div">
+                        <div class="row vertical-align chart-filter-bar">
+                            <div class="col-xs-3">
+                                <button type="button" class="btn btn-default" onclick="getOneWeekHeartData();">1 week</button>
+                                <button type="button" class="btn btn-default" onclick="getOneDayHeartData();">1 day</button>
+                                <button type="button" class="btn btn-default" onclick="getOneHourHeartData();">1 hour</button>
+                            </div>
+                            <div class="col-xs-2">
+                                <b>From: </b> <input type="date" id="inputHeartRangeFrom" class="form-control" placeholder="From">
+                            </div>
+                            <div class="col-xs-2">
+                                <b>To: </b> <input type="date" id="inputHeartRangeTo" class="form-control" placeholder="To">
+                            </div>
+                            <div class="col-xs-1">
+                                <button type="button" class="btn btn-default" onclick="getCustomRangeHeartData();"><i class="fas fa-search"></i></button>
+                            </div>
+                            <div class="col-xs-2">
+
+                            </div>
+                        </div>
                         <!--Divs that will hold each control and chart-->
                         <!--Div that will hold the line chart-->
                         <div id="heart_chart_div"></div>

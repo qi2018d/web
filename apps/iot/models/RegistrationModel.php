@@ -10,7 +10,6 @@ namespace Iot\Model;
 
 
 use Slimvc\Core\Model;
-include '../../public/iot/functions.php';
 
 class RegistrationModel extends Model
 {
@@ -39,6 +38,36 @@ class RegistrationModel extends Model
         }
 
         $name = $req->{'name'};
+        $sql = 'SELECT reg_id
+                FROM registration
+                WHERE user_id = ? AND CONV(bd_addr, 10, 16) = ?';
+        $stmt = $this->getReadConnection()->prepare($sql);
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        $stmt->execute(array($user_id, $bd_addr));
+        if($stmt->rowCount() > 0){
+            // already exist
+            throw new \Exception('bd_addr is already exist. ', 202);
+        }
+        else {
+            $sql = 'INSERT INTO registration (user_id, bd_addr, name)
+                    VALUE (:user_id, CONV(:bd_addr, 16, 10), :name)';
+            $stmt = $this->getReadConnection()->prepare($sql);
+            $stmt->bindParam('user_id', $user_id, FILTER_SANITIZE_NUMBER_INT);
+            $stmt->bindParam('bd_addr', $bd_addr, FILTER_SANITIZE_STRING);
+            $stmt->bindParam('name', $name, FILTER_SANITIZE_STRING);
+            $status = $stmt->execute();
+            if ($status){
+                return true;
+            }
+            else {
+                throw new \Exception('submit form is invalid. ', 203);
+            }
+        }
+    }
+
+    public function saveAutoRegistration($user_id, $bd_addr){
+
+        $name = $_SERVER['REQUEST_TIME'];
         $sql = 'SELECT reg_id
                 FROM registration
                 WHERE user_id = ? AND CONV(bd_addr, 10, 16) = ?';
@@ -110,4 +139,14 @@ class RegistrationModel extends Model
     }
 
 
+
+}
+function mac_address_formatter($str_addr){
+    if(strlen($str_addr) == 12){
+        $str_addr = substr(chunk_split($str_addr, 2, ":"),0,17);
+        return $str_addr;
+    }
+}
+function mac_address_str2hex($str_addr){
+    return ltrim(str_replace(':', '', $str_addr), '0');
 }

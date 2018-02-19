@@ -8,22 +8,98 @@
                 <div class="map-container">
 
                     <div id="air-map"></div>
+                    <div id='legend' class='legend'>
+                        <div class='legend-title'>Air Quality Index</div>
+                        <div class='legend-scale'>
+                            <ul class='legend-labels'>
+                                <li><span style='background:#38EA34;'></span>Good</li>
+                                <li><span style='background:#FFFA4D;'></span>Moderate</li>
+                                <li><span style='background:#FFAC56;'></span>Unhealthy for sensitive</li>
+                                <li><span style='background:#FF5A41;'></span>Unhealthy</li>
+                                <li><span style='background:#991C59;'></span>Very Unhealthy</li>
+                                <li><span style='background:#63171D;'></span>Hazardous</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!--<div id="legend">
+                        <div class="container"><span style="height: 40px; width: 150px; background: #38EA34AA; color:#FFF"></span><span>Good</span></div>
+                        <div class="container"><span style="height: 40px; width: 150px;  background: #FFFA4DAA; color:#FFF"></span><span>Moderate</span></div>
+                        <div class="container"><span style="height: 40px; width: 150px; background: #FFAC56AA; color:#FFF"></span><span>Unhealthy(sensitive)</span></div>
+                        <div class="container"><span style="height: 40px; width: 150px; background: #FF5A41AA; color:#FFF"></span><span>Unhealthy</span></div>
+                        <div class="container"><span style="height: 40px; width: 150px; background: #991C59AA; color:#FFF"></span><span>Very Unhealthy</span></div>
+                        <div class="container"><span style="height: 40px; width: 150px; background: #63171DAA; color:#FFF"></span><span>Hazardous</span></div><
+                    </div>-->
                     <script>
                         var map;
+                        var markerIcons = [];
+                        var autoUpdate;
 
                         function initMap() {
                             map = new google.maps.Map(document.getElementById('air-map'), {
-                                center: { lat:32.8787614, lng:-117.2349534 },
-                                zoom: 12,
-                                styles:[
-                                    {"featureType": "landscape", "stylers": [{"hue": "#FFBB00"}, {"saturation": 43.400000000000006}, { "lightness": 37.599999999999994}, {"gamma": 1}]},
-                                    {"featureType": "road.highway", "stylers": [{"hue": "#FFC200"}, {"saturation": -61.8}, {"lightness": 45.599999999999994}, {"gamma": 1}]},
-                                    {"featureType": "road.arterial", "stylers": [{"hue": "#FF0300"}, {"saturation": -100}, {"lightness": 51.19999999999999}, {"gamma": 1}]},
-                                    {"featureType": "road.local", "stylers": [{"hue": "#FF0300"}, {"saturation": -100}, {"lightness": 52}, {"gamma": 1}]},
-                                    {"featureType": "water", "stylers": [{"hue": "#0078FF"}, {"saturation": -13.200000000000003}, {"lightness": 2.4000000000000057}, {"gamma": 1}]},
-                                    {"featureType": "poi", "stylers": [{"hue": "#00FF6A"}, {"saturation": -1.0989010989011234}, {"lightness": 11.200000000000017}, {"gamma": 1}]}
-                                ]
+                                center: { lat:32.882258, lng:-117.234741 },
+                                zoom: 17,
+                                styles:[{"featureType":"landscape.man_made","elementType":"geometry","stylers":[{"color":"#f7f1df"}]},
+                                    {"featureType":"landscape.natural","elementType":"geometry","stylers":[{"color":"#d0e3b4"}]},
+                                    {"featureType":"landscape.natural.terrain","elementType":"geometry","stylers":[{"visibility":"off"}]},
+                                    {"featureType":"poi","elementType":"labels","stylers":[{"visibility":"off"}]},
+                                    {"featureType":"poi.business","elementType":"all","stylers":[{"visibility":"off"}]},
+                                    {"featureType":"poi.medical","elementType":"geometry","stylers":[{"color":"#fbd3da"}]},
+                                    {"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#bde6ab"}]},
+                                    {"featureType":"road","elementType":"geometry.stroke","stylers":[{"visibility":"off"}]},
+                                    {"featureType":"road","elementType":"labels","stylers":[{"visibility":"off"}]},
+                                    {"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#ffe15f"}]},
+                                    {"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#efd151"}]},
+                                    {"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},
+                                    {"featureType":"road.local","elementType":"geometry.fill","stylers":[{"color":"black"}]},
+                                    {"featureType":"transit.station.airport","elementType":"geometry.fill","stylers":[{"color":"#cfb2db"}]},
+                                    {"featureType":"water","elementType":"geometry","stylers":[{"color":"#a2daf2"}]}]
                             });
+
+                            markerIcons = [
+                                {
+                                    url: 'img/markers/marker-aqi-good.png',
+                                    size: new google.maps.Size(27, 43),
+                                    origin: new google.maps.Point(0, 0),
+                                    anchor: new google.maps.Point(13, 43)
+                                },
+                                {
+                                    url: 'img/markers/marker-aqi-moderate.png',
+                                    size: new google.maps.Size(27, 43),
+                                    origin: new google.maps.Point(0, 0),
+                                    anchor: new google.maps.Point(13, 43)
+                                },
+                                {
+                                    url: 'img/markers/marker-aqi-unhealthy-sensitive.png',
+                                    size: new google.maps.Size(27, 43),
+                                    origin: new google.maps.Point(0, 0),
+                                    anchor: new google.maps.Point(13, 43)
+                                },
+                                {
+                                    url: 'img/markers/marker-aqi-unhealthy.png',
+                                    size: new google.maps.Size(27, 43),
+                                    origin: new google.maps.Point(0, 0),
+                                    anchor: new google.maps.Point(13, 43)
+                                },
+                                {
+                                    url: 'img/markers/marker-aqi-unhealthy-very.png',
+                                    size: new google.maps.Size(27, 43),
+                                    origin: new google.maps.Point(0, 0),
+                                    anchor: new google.maps.Point(13, 43)
+                                },
+                                {
+                                    url: 'img/markers/marker-aqi-hazardous.png',
+                                    size: new google.maps.Size(27, 43),
+                                    origin: new google.maps.Point(0, 0),
+                                    anchor: new google.maps.Point(13, 43)
+                                }
+                            ];
+
+                            var legend = document.getElementById('legend');
+                            map.controls[google.maps.ControlPosition.BOTTOM].push(legend);
+
+
+
+
 
                             var zoom = map.getZoom();
                             map.data.setStyle(function(feature) {
@@ -37,20 +113,30 @@
                             google.maps.event.addListener(map, "dragend", function(){
                                 clearFeatures();
                                 getAirData(map.getBounds());
+
+                                clearInterval(autoUpdate);
+                                autoUpdate = setInterval(function(){ getAirData(map.getBounds()) }, 30000);
                             });
                             google.maps.event.addListener(map, "zoom_changed", function(){
                                 clearFeatures();
                                 getAirData(map.getBounds());
+
+                                clearInterval(autoUpdate);
+                                autoUpdate = setInterval(function(){ getAirData(map.getBounds()) }, 30000);
                             });
                             google.maps.event.addListener(map, "projection_changed", function(){
                                 clearFeatures();
                                 getAirData(map.getBounds());
+
+                                clearInterval(autoUpdate);
+                                autoUpdate = setInterval(function(){ getAirData(map.getBounds()) }, 30000);
                             });
                         }
+
                     </script>
                     <script src="js/kmeans.js"></script>
                     <script src="js/maps.js"></script>
-                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC94R7siOtY7X9L0P-9pTzQiCn7V2hbCaI&callback=initMap" async defer></script>
+                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC94R7siOtY7X9L0P-9pTzQiCn7V2hbCaI&callback=initMap&language=en" async defer></script>
                 </div>
                 <?php require 'common/footer.php' ?>
                 <div class="content-wrapper content-text"></div>
